@@ -1,5 +1,5 @@
 # VULCAN: Visualization Utility for Luminous Cluster Analysis in NIR/MIR
-## A Streamlit web application to explore IFU spectra in the Infrared
+## *A Streamlit web application to explore IFU spectra in the Infrared*
 
 ## Project Overview
 
