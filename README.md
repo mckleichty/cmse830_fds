@@ -30,7 +30,11 @@ requirements for environment should be listed
 
 ## App Features
 
-This section details the features Vulcan includes for the user's analysis. Some initial preprocessing steps include converting to rest-frame wavelength. This allows us to identify which emission and absorption lines are which in our spectra. This is not a mandatory step, but most astronomers would use this. Another preprocessing step is background subtraction. Many JWST IFU cubes are already background subtracted, but some are not. The plan is to add code that allows the user to also upload a background FITS file if it wasn't already subtracted. Other preprocessing steps could include dereddening (although this is not as significant for the general exploratory data analysis in this app), and masking out bad pixels based on quality flags from the datacube.
+Vulcan includes several key features to support users in analyzing their IFU data. Some of the initial preprocessing steps are:
+- Rest-frame wavelength conversion: This step shifts the observed spectra to the rest frame, making it easier to identify emission and absorption lines. While optional, it's a standard step in most astronomical analyses.
+- Background subtraction: Many JWST IFU cubes come pre-subtracted, but not all. Vulcan will eventually support user-provided background FITS files for cases where background removal is needed.
+- Data quality masking: includes masking of bad pixels based on quality flags in the data cube.
+- Dereddening (planned): Although not critical for general exploratory analysis, future updates may include dereddening to correct for dust extinction.
 
 After preprocessing, Vulcan will display 2D spatial maps and spectra, as well as extracting spectra at specific pixels. The user can input pixel coordinates into this function and the corresponding spectrum will pop out to the side.
 
