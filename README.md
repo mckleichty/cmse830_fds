@@ -25,8 +25,7 @@ The plan is to
 
 ## Getting Started
 
-Clone this repository...
-requirements for environment should be listed
+To use Vulcan, either clone the repository and install the requirements from the `requirements.txt` file, or follow this [link](https://cmse830fds-rxte2xpg3kggapp2vmnqgkk.streamlit.app/)!
 
 ## App Features
 
