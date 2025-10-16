@@ -3,7 +3,7 @@
 This file contains functions needed for plotting in Vulcan.
 
 Created by: McKenna Leichty
-Last Updated: Oct 13, 2025
+Last Updated: Oct 15, 2025
 
 """
 #import necessary modules
