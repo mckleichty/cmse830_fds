@@ -56,7 +56,7 @@ Once Gaussian fits are completed, users can inspect individual model fits visual
 - If the amplitude error was more than a third of the actual amplitude, this was a **poor** fit.
 - If any linewidths were significantly less than the resolution of the telescope, these were considered **failed** fits.
 - If the linewidth and amplitude errors were less than 10% of the actual values, these were considered **excellent** fits.
-- Otherwise, the fits were considered **good**
+- Otherwise, the fits were considered **good**.
 
 The fit quality levels are encoded to generate a fit quality map, which highlights which regions of the field have reliable model fits. In general, we would expect pixels closer to the center of the BCG to typically have higher signal-to-noise ratios, resulting in more accurate and higher-quality fits.
 
@@ -73,6 +73,4 @@ Ultimately, imputation is offered as a last resort, and users are strongly encou
 
 ## Streamlit features
 
-includes session state, caching, etc.
-
-
+Vulcan uses Streamlit’s `session_state` feature to maintain a smooth experience across interactions. This allows the app to persist uploaded files, user inputs, and intermediate results during reruns caused by widget updates. By storing key data in the session state, Vulcan avoids unnecessary recomputation and ensures that users don’t lose their progress when adjusting parameters or exploring different features.
