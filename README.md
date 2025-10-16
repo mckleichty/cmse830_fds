@@ -3,7 +3,7 @@
 
 ## Project Overview
 
-VULCAN is a web-based interactive visualization tool designed to support astrophysical research on galaxy clusters using spectral cube data from the James Webb Space Telescope's Medium Resolution Spectrometer (MRS). It focuses on exploring spaxels, gas dynamics, and emission line ratios using Abell 2597 (A2597) as a proxy.
+VULCAN is a web-based interactive visualization tool designed to support astrophysical research on galaxy clusters using spectral cube data from the James Webb Space Telescope's Medium Resolution Spectrometer (MRS). It focuses on exploring spaxels, gas dynamics, and emission line ratios using Abell 2597 (A2597) as a proxy target.
 
 The A2597 dataset was chosen because it is a well studied Brightest Cluster Galaxy (BCG), and currently has public JWST data out on it. This was used to design and write the code for Vulcan in preparation for future JWST datasets. As of now, Vulcan is not ready to handle other uploaded datasets.
 
