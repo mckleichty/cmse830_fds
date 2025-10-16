@@ -27,6 +27,8 @@ The plan is to
 
 To use Vulcan, either clone the repository and install the requirements from the `requirements.txt` file, or follow this [link](https://cmse830fds-rxte2xpg3kggapp2vmnqgkk.streamlit.app/)!
 
+If you would like to explore Vulcan's capabilities without your own dataset to upload, feel free to download the A2597 dataset either from the Mikulski Archive for Space Telescopes (MAST) or [this link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link)!
+
 ## App Features
 
 Vulcan includes several key features to support users in analyzing their IFU data. Some of the initial preprocessing steps are:
