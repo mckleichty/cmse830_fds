@@ -14,5 +14,11 @@ def sidebar_inputs():
     #inputting data
     st.sidebar.header("Data Input")
     uploaded_file = st.sidebar.file_uploader("Upload FITS data cube", type=["fits"], key="uploaded_file")
+    
+    #keep file in session state
+    if uploaded_file is not None:
+        st.session_state['uploaded_file'] = uploaded_file
+    elif 'uploaded_file' in st.session_state:
+        uploaded_file = st.session_state['uploaded_file']
 
     return uploaded_file, redshift
