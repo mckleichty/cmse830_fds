@@ -15,7 +15,7 @@ import plot as plot #visualizations
 st.set_page_config(layout="wide")
 
 #banner image
-st.image("banner.jpg", use_container_width=True)
+st.image("~/images/banner.jpg", use_container_width=True)
 
 st.set_page_config(page_title="Vulcan", layout="wide")
 st.title("VULCAN: Visualization Utility for Luminous Cluster Analysis in NIR/MIR")
@@ -41,7 +41,7 @@ st.header("Exploring Abell 2597")
 #information on A2597
 col1, col2 = st.columns([2.5, 1])
 with col2:
-    st.image("a2597.jpg", use_container_width=True)
+    st.image("~/images/a2597.jpg", use_container_width=True)
     st.markdown(r"""$\textbf{Figure 1.}$ This image combines X-ray data from NASA's Chandra X-ray Observatory 
                 (shown in blue), optical data from the Hubble Space Telescope and the Digitized Sky Survey 
                 (in yellow), and hydrogen emission (in red) captured by the Walter Baade Telescope in Chile.
