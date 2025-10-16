@@ -17,8 +17,8 @@ def sidebar_inputs():
     
     #keep file in session state
     if uploaded_file is not None:
-        st.session_state['uploaded_file'] = uploaded_file
-    elif 'uploaded_file' in st.session_state:
-        uploaded_file = st.session_state['uploaded_file']
+        st.session_state['persisted_file'] = uploaded_file
+    elif 'persisted_file' in st.session_state:
+        uploaded_file = st.session_state['persisted_file']
 
     return uploaded_file, redshift
