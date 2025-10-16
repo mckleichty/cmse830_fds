@@ -68,7 +68,7 @@ information on this BCG is bulleted below:
 Vulcan provides an interactive environment for analyzing mid-infrared observations captured by JWST's Medium 
 Resolution Spectrometer (MRS), using A2597 as a proxy target. By default, it loads Channel 3 data from the MRS, which primarily focuses on 
 molecular hydrogen and forbidden neon lines; this dataset was downloaded directly from the Mikulski Archive for 
-Space Telescopes (MAST).
+Space Telescopes (MAST) and is also available for download [here](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link).
 """)
 
 st.subheader("IFU Information")
