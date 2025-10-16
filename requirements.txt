@@ -1,0 +1,9 @@
+streamlit
+pandas
+numpy
+astropy
+scipy
+sklearn
+spectral_cube
+plotly
+vorbin
