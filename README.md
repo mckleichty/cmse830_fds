@@ -71,4 +71,4 @@ Ultimately, imputation is offered as a last resort, and users are strongly encou
 
 ## Streamlit features
 
-Vulcan uses Streamlit’s `session_state` feature to maintain a smooth experience across interactions. This allows the app to persist uploaded files, user inputs, and intermediate results during reruns caused by widget updates. By storing key data in the session state, Vulcan avoids unnecessary recomputation and ensures that users don’t lose their progress when adjusting parameters or exploring different features.
+Vulcan uses Streamlit’s `session_state` feature to persist uploaded files, user inputs, and intermediate results during reruns caused by widget updates. By storing key data in the session state, Vulcan avoids unnecessary recomputation and ensures that users don’t lose their progress when adjusting parameters or exploring different features.
