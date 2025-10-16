@@ -71,7 +71,6 @@ molecular hydrogen and forbidden neon lines; this dataset was downloaded directl
 Space Telescopes (MAST) and is also available for download from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link).
 """)
 
-st.write("testing this works")
 st.subheader("IFU Information")
 st.markdown("Below includes some general information about the type and shape of our IFU dataset.")
 
