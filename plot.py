@@ -42,6 +42,7 @@ def total_imgs(collapsed, wavelengths, flux, peak_wavelengths, peaks):
             yaxis=dict(title=dict(text='Y Pixel', font=dict(color='black')), tickfont=dict(color='black')),
             hoverlabel=dict(font=dict(color='black')),
             height=450,
+            width=400
         )
 
         st.plotly_chart(fig_img, width='stretch')
