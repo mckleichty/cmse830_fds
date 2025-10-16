@@ -119,7 +119,7 @@ def total_imgs(collapsed, wavelengths, flux, peak_wavelengths, peaks):
             height=450,
         )
 
-        st.plotly_chart(fig_spec, use_container_width=True)
+        st.plotly_chart(fig_spec, width='stretch')
 
 ####################################
 ## IMAGE 2: local continuum plots ##
@@ -155,7 +155,7 @@ def continuum_imgs(images, titles):
                 height=400
             )
 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
 ############################################
 ## IMAGE 3: side by side image and spaxel ##
@@ -196,7 +196,7 @@ def spaxel_imgs(collapsed, data_cube, x_pixel, y_pixel, wavelengths):
             line=dict(color="black", width=2),
             layer="above"
         )
-        st.plotly_chart(fig_imgs, use_container_width=True, key="plotly_img")
+        st.plotly_chart(fig_imgs, width='stretch', key="plotly_img")
 
     with col2:
         st.subheader("Selected Spaxel")
@@ -241,7 +241,7 @@ def spaxel_imgs(collapsed, data_cube, x_pixel, y_pixel, wavelengths):
             height=450,
         )
 
-        st.plotly_chart(fig_specs, use_container_width = True, key="plotly_spectrum")
+        st.plotly_chart(fig_specs, width='stretch', key="plotly_spectrum")
 
 #########################
 ## IMAGE 4: Linewidths ##
@@ -302,7 +302,7 @@ def linewidth_plot(titles, linewidth_maps, lw_err_maps):
             stats_df["Value (μm)"] = stats_df["Value (μm)"].map(lambda x: f"{x:.5f}")
             stats_df["Error (μm)"] = stats_df["Error (μm)"].map(lambda x: f"{x:.5f}")
 
-            st.dataframe(stats_df, use_container_width=True, height=150)
+            st.dataframe(stats_df, width='stretch', height=150)
 
 ##########################
 ## IMAGE 5: Quality Map ##
@@ -343,7 +343,7 @@ def quality_map_img(quality_map):
             height=500
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     
     with col2:
         st.markdown("""
@@ -391,7 +391,7 @@ def imputation_imgs(linewidth_maps, lw_err_maps, selected_index, linewidth_maps_
             height=450
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         
         #print statistical values off for each peak wavelength
         linewidth_data = np.array(linewidth_maps[selected_index]).flatten()
@@ -420,7 +420,7 @@ def imputation_imgs(linewidth_maps, lw_err_maps, selected_index, linewidth_maps_
         stats_df["Value (μm)"] = stats_df["Value (μm)"].map(lambda x: f"{x:.5f}")
         stats_df["Error (μm)"] = stats_df["Error (μm)"].map(lambda x: f"{x:.5f}")
 
-        st.dataframe(stats_df, use_container_width=True, height=150)
+        st.dataframe(stats_df, width='stretch', height=150)
         
     with col1:
         for line_idx in range(len(linewidth_maps_second)): #going row by row
@@ -445,7 +445,7 @@ def imputation_imgs(linewidth_maps, lw_err_maps, selected_index, linewidth_maps_
             height=450
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
         #print statistical values off for each peak wavelength
         linewidth_data = np.array(linewidth_maps_second[selected_index]).flatten()
@@ -474,4 +474,4 @@ def imputation_imgs(linewidth_maps, lw_err_maps, selected_index, linewidth_maps_
         stats_df["Value (μm)"] = stats_df["Value (μm)"].map(lambda x: f"{x:.5f}")
         stats_df["Error (μm)"] = stats_df["Error (μm)"].map(lambda x: f"{x:.5f}")
 
-        st.dataframe(stats_df, use_container_width=True, height=150)
+        st.dataframe(stats_df, width='stretch', height=150)
