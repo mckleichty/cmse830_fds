@@ -44,7 +44,7 @@ def total_imgs(collapsed, wavelengths, flux, peak_wavelengths, peaks):
             height=450,
         )
 
-        st.plotly_chart(fig_img, use_container_width=True)
+        st.plotly_chart(fig_img, width='stretch')
 
     with col2:
         st.subheader("Total 1D Spectrum")
