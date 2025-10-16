@@ -3,7 +3,7 @@ pandas
 numpy
 astropy
 scipy
-sklearn
+scikit-learn
 spectral_cube
 plotly
 vorbin
