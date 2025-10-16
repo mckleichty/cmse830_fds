@@ -41,7 +41,7 @@ st.header("Exploring Abell 2597")
 #information on A2597
 col1, col2 = st.columns([2.5, 1])
 with col2:
-    st.image("~/images/a2597.jpg", use_container_width=True)
+    st.image("https://github.com/mckleichty/cmse830_fds/blob/main/images/a2597.jpg?raw=true", use_container_width=True)
     st.markdown(r"""$\textbf{Figure 1.}$ This image combines X-ray data from NASA's Chandra X-ray Observatory 
                 (shown in blue), optical data from the Hubble Space Telescope and the Digitized Sky Survey 
                 (in yellow), and hydrogen emission (in red) captured by the Walter Baade Telescope in Chile.
