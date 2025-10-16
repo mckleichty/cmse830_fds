@@ -5,6 +5,7 @@ import os
 import astropy.units as u
 from scipy.signal import find_peaks
 from sklearn.preprocessing import OrdinalEncoder
+from io import BytesIO
 
 #importing files I wrote
 import util as util #useful functions that would otherwise clutter this file up
@@ -33,7 +34,6 @@ Here you can explore the A2597 dataset from the James Webb Space Telescope and:
 
 #get sidebar values
 uploaded_file, z_input = sidebar_inputs()
-#z_input = sidebar_inputs()
 
 #information about this dataset
 st.header("Exploring Abell 2597")
@@ -68,28 +68,21 @@ information on this BCG is bulleted below:
 Vulcan provides an interactive environment for analyzing mid-infrared observations captured by JWST's Medium 
 Resolution Spectrometer (MRS), using A2597 as a proxy target. By default, it loads Channel 3 data from the MRS, which primarily focuses on 
 molecular hydrogen and forbidden neon lines; this dataset was downloaded directly from the Mikulski Archive for 
-Space Telescopes (MAST) and is also available for download [here](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link).
+Space Telescopes (MAST) and is also available for download from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link).
 """)
 
 st.write("testing this works")
 st.subheader("IFU Information")
 st.markdown("Below includes some general information about the type and shape of our IFU dataset.")
-from io import BytesIO
 
 #load primary FITS file
 if uploaded_file is not None:
     file_bytes = uploaded_file.getvalue()
-    file_to_use = BytesIO(file_bytes)  # wrap in BytesIO for first use
-    file_to_use_for_convert = BytesIO(file_bytes)  # new BytesIO for second use
+    file_to_use = BytesIO(file_bytes)  #wrap in BytesIO for first use (because fits was having errors opening this file twice)
+    file_to_use_for_convert = BytesIO(file_bytes)  #new BytesIO for second use
     st.success("Using uploaded FITS file.")
 else:
-    #default_path = "jw04094-o003_t003_miri_ch3-shortmediumlong_s3d.fits"
-    #if os.path.exists(default_path):
-    #    file_to_use = default_path
-    ##    file_to_use_for_convert = default_path
-        #st.info("Using default FITS file.")
-    #else:
-    st.error("No file uploaded. Go to (link) to test Vulcan on Abell 2597!")
+    st.error("No file uploaded.")
     st.stop()
 
 #print information about the science data cube out
@@ -128,11 +121,10 @@ peak_wavelengths = wavelengths[peaks]
 collapsed = data_cube.sum(axis=0).value #shape (y, x)
 plot.total_imgs(collapsed, wavelengths, flux, peak_wavelengths, peaks)
 #figure caption
-st.markdown(r"""$\textbf{Figure 2. (Left)}$ Completely interactive. If you would like to zoom in on a specific region,
-            just click and drag to highlight the box to zoom in on. To return to full-view, double click. 
+st.markdown(r"""$\textbf{Figure 2. (Left)}$ 2D image of A2597 summed over the spectral axis, in this case, wavelength. The colorbar
+            marks the intensity at each pixel in the image.
             $\textbf{(Right)}$ The total spectrum of A2597 from Channel 3 of the MRS IFU. The three emission lines that
             are present are H$_2$(S2), [NeII], and [NeIII].
-
             """)
 
 ####################################
@@ -140,9 +132,8 @@ st.markdown(r"""$\textbf{Figure 2. (Left)}$ Completely interactive. If you would
 ####################################
 
 st.header("Spatial Structure of Emission Lines")
-st.markdown(r"""This is to show how we background subtract out the local continuum, defined as 
-            $\pm 0.1$ um.
-
+st.markdown(r"""This part of Vulcan subtracts the locally-defined continuum out from the emission lines found in the previous plot.
+            The local continuum is defined as $\pm 0.1$ um either side of the peak wavelength.
             """)
 
 #round the peak wavelengths for display
@@ -172,12 +163,8 @@ plot.continuum_imgs(images, titles)
 st.markdown(r"""$\textbf{Figure 3. (Left)}$ This is the spectral slab of $\pm 0.01$ microns either side 
             the peak wavelength, which includes part of the continuum. $\textbf{(Middle)}$ This is the left plot 
             minus the right plot. It represents the emission line without the local continuum. $\textbf{(Right)}$ 
-            This plot is showing the spectral slabs of the local continuum either side the peak wavelength. 
-            It's defined as: (peak_wavelength - 0.01) - local, (peak_wavelength - 0.01) for the left side of the 
-            emission line, and (peak_wavelength + 0.01), (peak_wavelength + 0.01) + local for the right side. 
-            local is defined as 0.1 microns. The red crosshair is showing the center of the BCG as defined in 
-            Donahue et al. 2011.
-
+            This plot is showing the spectral slabs of the local continuum either side the peak wavelength, defined as
+            0.1 microns out from the center.
             """)
 
 ############################################
@@ -191,13 +178,14 @@ y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15)
 
 plot.spaxel_imgs(collapsed, data_cube, x_pixel, y_pixel, wavelengths)
 
-st.markdown(r"""$\textbf{Figure 4. (Left)}$ This shows a 2D spatial map of the A2597 BCG summed over the spectral axis. 
-            The black box highlights the user's inputted x,y coordinate. The colorbar shows the intensity
-            at each pixel. $\textbf{(Right)}$ Remember, the lines shown are H$_2$(S2), [NeII], and [NeIII] from left to right,
+st.markdown(r"""$\textbf{Figure 4. (Left)}$ A 2D spatial map of the A2597 BCG summed over the spectral axis. 
+            The black box highlights the user's inputted (x,y) coordinate. The colorbar shows the intensity
+            at each pixel. $\textbf{(Right)}$ The lines shown are H$_2$(S2), [NeII], and [NeIII] from left to right,
             respectively. This displays the spectrum at the inputted pixel, called a spaxel. At the
             default (18, 15) pixel, there is clear broadening effects in the [NeII] and [NeIII] lines. This is most likely 
             due to winds by the AGN. However, we see a lack of broadening in the H$_2$(S2) line. This implies 
-            there is some other ionizing source than what is ionizing [NeII] and [NeIII]. 
+            there is either some other ionizing source than what is ionizing [NeII] and [NeIII] or a cloud of molecular
+            Hydrogen separate from a cloud of Neon gas. 
             """)
 
 #########################
@@ -207,7 +195,7 @@ st.markdown(r"""$\textbf{Figure 4. (Left)}$ This shows a 2D spatial map of the A
 st.header("Calculating Linewidths")
 st.markdown("""This next section of code will allow the user to create moment maps that show the dynamics
             of the gas in the BCG. To start, for areas of low signal-to-noise, Vulcan applies the Vorobin method 
-            to bin pixels together to achieve some user-inputted threshold. This can be inputted below. 
+            to bin pixels together to achieve some user-inputted S/N threshold. This can be inputted below. 
             """)
 
 #WCS information is needed to convert MJy/sr of each pixel to Jy
@@ -256,9 +244,9 @@ else:
     bin_map = st.session_state.bin_map
     bin_num = st.session_state.bin_num
 
-st.markdown("""Vulcan then fits a simple Gaussian model to the three peak wavelengths at each pixel or 
+st.markdown("""Vulcan then fits a simple Gaussian model to the peak wavelengths at each pixel or 
             region, and returns the linewidth based on the standard deviation of this model. If you would like
-            to view the Gaussian fits for a given pixel, check the box below and enter the pixel coords.
+            to view the Gaussian fits for a given pixel, check the box below and enter the pixel coordinates.
             """)
 
 #the following shows Gaussian fits of the three emission lines based on an user-inputted pixel coord
@@ -267,7 +255,7 @@ if st.checkbox("Show Gaussian fits?"):
     y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y2')
     i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
     _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
-    st.write("calculate chi^2 for this fit? also, need to have the name of the line show up for this plot. also explain how if one of the lines doesn't show up its because the fit failed for that emission line in that pixel")
+    #st.write("calculate chi^2 for this fit?")
 
 #define session key
 gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
@@ -441,8 +429,8 @@ titles2 = [
 #now plot them!
 plot.linewidth_plot(titles2, linewidth_maps, lw_err_maps)
 
-st.markdown(r"""$\textbf{Figure 5.}$ This is the map of linewidths for h2s2, [NeII], and neiii. regions of high
-            linewidth indicate a broadening effect. we would expect to see this near the center of the BCG due to
+st.markdown(r"""$\textbf{Figure 5.}$ This is the map of linewidths for H$_2$(S2), [NeII], and [NeIII]. Regions of high
+            linewidth indicate a broadening effect. We would expect to see this near the center of the BCG due to
             winds by the AGN, as well as other areas with fast-moving gas.
             """)
 
@@ -453,7 +441,7 @@ st.markdown(r"""$\textbf{Figure 5.}$ This is the map of linewidths for h2s2, [Ne
 #starting imputation section
 st.subheader("Imputation")
 
-st.markdown("""Besides the JWST data quality array, we can also create a fit quality check. To view the fit quality
+st.markdown("""Besides the JWST data quality array, we can also create our own fit quality check. To view the fit quality
             map, check the box below. We can also attempt
 to impute these poor quality fits with our own linewidth choice. Vulcan does this initially in two different ways:
 by imputing the mean of the linewidths and by imputing the mean of the spatially k nearest neighbors.
@@ -507,8 +495,8 @@ for i, mask in enumerate(valid_bin_masks):
 #this function imputes based on the average linewidth of the k nearest neighbors and plots the results of both imputations
 plot.imputation_imgs(linewidth_maps, lw_err_maps, selected_index, linewidth_maps_second, lw_err_maps_second, quality_map, k)
 
-st.markdown("""Obviously, imputing the mean has no significant value. This tells us nothing about the structure of the 
-            gas at those pixels. Our best attempt at recovering some dynamical information is by using the spatial knn 
+st.markdown("""Realistically, imputing the average linewidth has no significant value. This tells us nothing about the structure of the 
+            gas at those pixels. Our best attempt at recovering some dynamical information is by using the spatial KNN 
             method, but even then, we can't impute values if there's nothing else nearby. A future update of Vulcan might
             include different imputation methods to choose from.
 """)
@@ -521,6 +509,7 @@ st.header("Coming Soon in Theaters Near You")
 st.markdown("""
 - Moment maps of redshift, velocity, and velocity dispersion
 - Line ratio maps
+- New imputation methods
 - Support for additional datasets            
 
 """)
