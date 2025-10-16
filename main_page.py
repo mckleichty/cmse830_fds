@@ -15,7 +15,7 @@ import plot as plot #visualizations
 st.set_page_config(layout="wide")
 
 #banner image
-st.image("~/images/banner.jpg", use_container_width=True)
+st.image("https://github.com/mckleichty/cmse830_fds/blob/main/images/banner.jpg?raw=true", use_container_width=True)
 
 st.set_page_config(page_title="Vulcan", layout="wide")
 st.title("VULCAN: Visualization Utility for Luminous Cluster Analysis in NIR/MIR")
