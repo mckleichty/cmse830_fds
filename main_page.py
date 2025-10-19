@@ -192,7 +192,8 @@ st.markdown(r"""$\textbf{Figure 4. (Left)}$ A 2D spatial map of the A2597 BCG su
 #########################
 
 st.header("Calculating Linewidths")
-st.markdown("""This next section of code will allow the user to create moment maps that show the dynamics
+st.markdown("""**This next section of code might take a couple of minutes to run!** This is where Vulcan begins creating moment
+            maps that show the dynamics
             of the gas in the BCG. To start, for areas of low signal-to-noise, Vulcan applies the Vorobin method 
             to bin pixels together to achieve some user-inputted S/N threshold. This can be inputted below. 
             """)
