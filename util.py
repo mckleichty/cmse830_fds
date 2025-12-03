@@ -413,7 +413,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
 
     except (RuntimeError, ValueError):
         #if the fit fails, just return NaN vals
-        return [np.nan]*5, np.nan, np.nan, np.array([np.nan]*5)
+        return [np.nan]*5, np.nan, np.nan, np.array([np.nan]*5), np.nan
 
     #get the uncertainty in stddev_fit from the covariance matrix
     stddev_uncertainty = np.sqrt(pcov[2, 2])
