@@ -474,13 +474,6 @@ else:
     good_quality_labels = fit_results["good_quality_labels"]
     good_quality_encoded = fit_results["good_quality_encoded"]
 """
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import streamlit as st
-import numpy as np
-import os
-from sklearn.preprocessing import OrdinalEncoder
-import parallel   # <-- your external parallel module containing extracted_vals_from_gaussian()
-
 
 gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
 
