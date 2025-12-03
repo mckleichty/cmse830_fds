@@ -282,7 +282,7 @@ with tab3:
             results = list(executor.map(parallel.run_pixel_fit, tasks))
         
         #cache raw Gaussian results separately
-        st.session_state[gaussian_results_key] = results
+        st.session_state.gaussian_results = results
 
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
@@ -538,8 +538,7 @@ with tab4:
     st.header("ML-Based Second Component Prediction")
 
     # Load cached raw Gaussian results
-    gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
-    results = st.session_state[gaussian_results_key]
+    bin_fluxes = st.session_state.gaussian_results
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
