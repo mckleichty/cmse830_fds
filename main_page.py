@@ -558,6 +558,10 @@ with tab4:
     amp_err = fit_results["amp_err"]
     valid_bin_fluxes = fit_results["valid_bin_fluxes"]
     peak_wavelengths = st.session_state.peak_wavelengths
+    bin_fluxes = st.session_state.bin_fluxes
+    bin_errors = st.session_state.bin_errors
+    bin_map = st.session_state.bin_map
+    #bin_masks = st.session_state.bin_masks
 
     # --- Train or load Random Forest model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
@@ -636,8 +640,16 @@ with tab4:
         needs_second_list.append(bool(rf_second.predict(features)[0]))
 
     st.session_state[gauss_key]["needs_second_component"] = needs_second_list
-
-    _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelengths, fit_width, wavelengths, flux, flux_err, 
+    
+    #i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
+    #_, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
+    
+    x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
+    y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
+    i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
+    peak_wavelength = peak_wavelengths[0]
+    title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
+    _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
                     title, second_component_mask=np.array(needs_second_list), truncate_side=None, 
                     truncate_percent=0.0, plot=True)
     
