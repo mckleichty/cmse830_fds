@@ -646,7 +646,10 @@ with tab4:
     for y in range(bin_map.shape[0]):
         for x in range(bin_map.shape[1]):
             bin_idx = bin_map[y, x]
-            second_component_map[y, x] = int(needs_second_list[bin_idx])
+            if bin_idx < len(needs_second_list):  # <-- check index is valid
+                second_component_map[y, x] = int(needs_second_list[bin_idx])
+            else:
+                second_component_map[y, x] = 0  # default to single component
 
     st.subheader("Second Component Map")
     st.image(second_component_map, caption="Pixels needing second component (1) vs single component (0)",
