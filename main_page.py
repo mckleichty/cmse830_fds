@@ -262,15 +262,13 @@ if st.checkbox("Show Gaussian fits?"):
 #define session key
 gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
 
-
-"""
 #check if we've already computed results for this SNR
 if gauss_key not in st.session_state:
     #progress bar
     st.write("Computing Gaussian fits in parallel...")
 
     #number of worker processes to use
-    N_WORKERS = max(1, os.cpu_count() - 1)
+    N_WORKERS = min(4, os.cpu_count())
 
     #package arguments for each pixel
     tasks = [(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i]) for i in range(len(bin_fluxes))]
@@ -286,6 +284,12 @@ if gauss_key not in st.session_state:
     lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
     amp, amp_err = [], []
 
+    #ChatGPT-4o was used on Oct 11, 2025 to generate the code for the ordinal encoder (because I have never used encoders before)
+    #define encoder and fit it on the quality categories
+    quality_levels = ['failed', 'poor', 'good', 'excellent']
+    encoder = OrdinalEncoder(categories=[quality_levels]) #used to convert quality levels to numbers
+    encoder.fit([[q] for q in quality_levels])
+
     quality_labels = []
     quality_encoded = []
     good_quality_labels = []
@@ -300,20 +304,79 @@ if gauss_key not in st.session_state:
     for i, res in enumerate(results):
         all_bin_masks.append(bin_masks[i])
 
+        #fit gaussian model to each pixel, return linewidth and other values from this fit
         lws_, lw_err_, mean_fit_, mean_fit_err_, amp_, amp_err_ = res
+        #lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i])
+        
+        #if any of the fits returned NaN vals, this is obviously a failed fit
+        if np.any(np.isnan(lw_err_)) or np.any(np.isnan(lw_)) or np.any(np.isnan(mean_fit)) or np.any(np.isnan(mean_fit_errs)) or np.any(np.isnan(amp_)) or np.any(np.isnan(amp_err_)):
+            quality_labels.append('failed')
+            quality_encoded.append(encoder.transform([['failed']])[0][0]) #encode the failed keyword as a number
+            continue
+        
+        #if any of the linewidths are returned as negative values, this is also an obvious fail
+        if np.any(np.array(lw_) < 0.0):
+            quality_labels.append('failed')
+            quality_encoded.append(encoder.transform([['failed']])[0][0])
+            continue
+        
+        #if the linewidth error is greater than the linewidth, this is a poor fit.
+        if np.any(np.array(lw_err_) > lw_):
+            quality_labels.append('poor')
+            quality_encoded.append(encoder.transform([['poor']])[0][0])
+            continue
+        
+        #if the amplitude error is greater than a third of the amplitude, this is a poor fit.
+        if np.any(np.array(amp_err_) > (1 / 3) * np.array(amp_)):
+            quality_labels.append('poor')
+            quality_encoded.append(encoder.transform([['poor']])[0][0])
+            continue
 
-        # --- your existing classification code ---
-        # The classification block you already wrote should be pasted here.
-        # It will look almost identical, except that we now use the outputs
-        # from res = results[i].
+        #calculate the resolution of our lines
+        h2s2_res = (mean_fit[0] / (2 * np.sqrt(2 * np.log(2)) * lw_[0])) 
+        ne2_res =  (mean_fit[1] / (2 * np.sqrt(2 * np.log(2)) * lw_[1]))
+        ne3_res =  (mean_fit[2] / (2 * np.sqrt(2 * np.log(2)) * lw_[2]))
+        
+        #if any of our measured resolutions are smaller than the telescope, these are failed fits. 
+        #it is not possible to get a better resolution than the actual resolution of the telescope
+        if any([
+            h2s2_res < (0.1 * 2530), #these values for telescope resolution we're grabbed from the MIRI MRS website
+            ne2_res < (0.1 * 2530), #found at this link: https://jwst-docs.stsci.edu/jwst-mid-infrared-instrument/miri-observing-modes/miri-medium-resolution-spectroscopy#gsc.tab=0
+            ne3_res < (0.1 * 1980),
+        ]):
+            quality_labels.append('failed')
+            quality_encoded.append(encoder.transform([['failed']])[0][0])
+            continue
 
-        # IMPORTANT: continue producing:
-        #   lw, lw_err, mean_fits, mean_fit_errs, amp, amp_err
-        #   quality_labels, quality_encoded
-        #   valid_bin_masks, valid_bin_fluxes, valid_bin_errs
-        #   etc.
+        #if these values passed all checks we now decide between 'good' and 'excellent' fits
+        #excellent fits will be defined as when the errors are less than 10% of the actual value
+        #otherwise, we'll call the fits good
+        if all([
+            np.all(np.array(lw_err_) < 0.1 * np.array(lw_)),
+            np.all(np.array(amp_err_) < 0.1 * np.array(amp_)),
+        ]):
+            good_quality_labels.append('excellent')
+            good_quality_encoded.append(encoder.transform([['excellent']])[0][0])
+            quality_labels.append('excellent')
+            quality_encoded.append(encoder.transform([['excellent']])[0][0])
+        else:
+            quality_labels.append('good')
+            quality_encoded.append(encoder.transform([['good']])[0][0])
+            good_quality_labels.append('good')
+            good_quality_encoded.append(encoder.transform([['good']])[0][0])
 
-    # store in cache
+        #append all our results
+        lw.append(lw_)
+        lw_err.append(lw_err_)
+        mean_fits.append(mean_fit)
+        mean_fits_errs.append(mean_fit_errs)
+        amp.append(amp_)
+        amp_err.append(amp_err_)
+        valid_bin_masks.append(bin_masks[i])
+        valid_bin_fluxes.append(bin_fluxes[i])
+        valid_bin_errs.append(bin_errors[i])
+
+    #cache all results in session state because this function takes even longer to run
     st.session_state[gauss_key] = {
         "lw": lw,
         "lw_err": lw_err,
@@ -332,14 +395,24 @@ if gauss_key not in st.session_state:
     }
 
 else:
-    # load from session state (same as before)
-    ...
+    #load from session state
+    fit_results = st.session_state[gauss_key]
+    lw = fit_results["lw"]
+    lw_err = fit_results["lw_err"]
+    mean_fits = fit_results["mean_fits"]
+    mean_fits_errs = fit_results["mean_fits_errs"]
+    amp = fit_results["amp"]
+    amp_err = fit_results["amp_err"]
+    valid_bin_masks = fit_results["valid_bin_masks"]
+    valid_bin_fluxes = fit_results["valid_bin_fluxes"]
+    valid_bin_errs = fit_results["valid_bin_errs"]
+    quality_labels = fit_results["quality_labels"]
+    quality_encoded = fit_results["quality_encoded"]
+    all_bin_masks = fit_results["all_bin_masks"]
+    good_quality_labels = fit_results["good_quality_labels"]
+    good_quality_encoded = fit_results["good_quality_encoded"]
 
-
-
-
-    
-
+    """
     #ChatGPT-4o was used on Oct 11, 2025 to generate the code for the ordinal encoder (because I have never used encoders before)
     #define encoder and fit it on the quality categories
     quality_levels = ['failed', 'poor', 'good', 'excellent']
@@ -473,170 +546,8 @@ else:
     all_bin_masks = fit_results["all_bin_masks"]
     good_quality_labels = fit_results["good_quality_labels"]
     good_quality_encoded = fit_results["good_quality_encoded"]
-"""
-
-gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
-
-# If results for this SNR have NOT yet been computed
-if gauss_key not in st.session_state:
-
-    st.write("Computing Gaussian fits in parallel...")
-
-    # Progress bar UI
-    progress = st.progress(0.0)
-    status = st.empty()
-
-    # Encoder setup (this must occur BEFORE classification)
-    quality_levels = ['failed', 'poor', 'good', 'excellent']
-    encoder = OrdinalEncoder(categories=[quality_levels])
-    encoder.fit([[q] for q in quality_levels])
-
-    N_PIX = len(bin_fluxes)
-    N_WORKERS = min(4, os.cpu_count())
-
-    # Build task list
-    tasks = [
-        (peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i])
-        for i in range(N_PIX)
-    ]
-
-    # Storage
-    lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
-    amp, amp_err = [], []
-
-    quality_labels = []
-    quality_encoded = []
-    good_quality_labels = []
-    good_quality_encoded = []
-
-    all_bin_masks = []
-    valid_bin_masks = []
-    valid_bin_fluxes = []
-    valid_bin_errs = []
-
-    # Parallel execution
-    with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
-
-        futures = {
-            executor.submit(parallel.extracted_vals_from_gaussian, *task): idx
-            for idx, task in enumerate(tasks)
-        }
-
-        for n, future in enumerate(as_completed(futures)):
-            i = futures[future]   # pixel index
-            lws_, lw_err_, mean_fit_, mean_fit_err_, amp_, amp_err_ = future.result()
-
-            all_bin_masks.append(bin_masks[i])
-
-            # -----------------------
-            # BEGIN CLASSIFICATION
-            # -----------------------
-
-            # Case 1: Any NaN → failed
-            if np.any(np.isnan(lws_)) or np.any(np.isnan(lw_err_)) or np.any(np.isnan(mean_fit_)) or np.any(np.isnan(mean_fit_err_)) or np.any(np.isnan(amp_)) or np.any(np.isnan(amp_err_)):
-                quality_labels.append('failed')
-                quality_encoded.append(encoder.transform([['failed']])[0][0])
-            else:
-                # Case 2: Negative linewidths → failed
-                if np.any(np.array(lws_) < 0.0):
-                    quality_labels.append('failed')
-                    quality_encoded.append(encoder.transform([['failed']])[0][0])
-                else:
-                    # Case 3: error > value → poor
-                    if np.any(np.array(lw_err_) > np.array(lws_)):
-                        quality_labels.append('poor')
-                        quality_encoded.append(encoder.transform([['poor']])[0][0])
-                    # Case 4: amplitude error > 1/3 amplitude → poor
-                    elif np.any(np.array(amp_err_) > (1/3) * np.array(amp_)):
-                        quality_labels.append('poor')
-                        quality_encoded.append(encoder.transform([['poor']])[0][0])
-                    else:
-                        # Check telescope resolution constraints
-                        h2s2_res = (mean_fit_[0] / (2 * np.sqrt(2*np.log(2)) * lws_[0]))
-                        ne2_res  = (mean_fit_[1] / (2 * np.sqrt(2*np.log(2)) * lws_[1]))
-                        ne3_res  = (mean_fit_[2] / (2 * np.sqrt(2*np.log(2)) * lws_[2]))
-
-                        if any([
-                            h2s2_res < (0.1*2530),
-                            ne2_res < (0.1*2530),
-                            ne3_res < (0.1*1980),
-                        ]):
-                            quality_labels.append('failed')
-                            quality_encoded.append(encoder.transform([['failed']])[0][0])
-                        else:
-                            # Good vs Excellent
-                            if all([
-                                np.all(np.array(lw_err_) < 0.1*np.array(lws_)),
-                                np.all(np.array(amp_err_) < 0.1*np.array(amp_))
-                            ]):
-                                q = 'excellent'
-                                good_quality_labels.append(q)
-                                good_quality_encoded.append(encoder.transform([[q]])[0][0])
-                            else:
-                                q = 'good'
-                                good_quality_labels.append(q)
-                                good_quality_encoded.append(encoder.transform([[q]])[0][0])
-
-                            quality_labels.append(q)
-                            quality_encoded.append(encoder.transform([[q]])[0][0])
-
-                            # Append valid-only arrays
-                            lw.append(lws_)
-                            lw_err.append(lw_err_)
-                            mean_fits.append(mean_fit_)
-                            mean_fits_errs.append(mean_fit_err_)
-                            amp.append(amp_)
-                            amp_err.append(amp_err_)
-                            valid_bin_masks.append(bin_masks[i])
-                            valid_bin_fluxes.append(bin_fluxes[i])
-                            valid_bin_errs.append(bin_errors[i])
-
-            # -----------------------
-            # END CLASSIFICATION
-            # -----------------------
-
-            # Update progress bar
-            progress.progress((n+1)/N_PIX)
-            status.write(f"Processed {n+1} / {N_PIX} pixels")
-
-    status.write("Gaussian fits completed.")
-
-    # Save to session state
-    st.session_state[gauss_key] = {
-        "lw": lw,
-        "lw_err": lw_err,
-        "mean_fits": mean_fits,
-        "mean_fits_errs": mean_fits_errs,
-        "amp": amp,
-        "amp_err": amp_err,
-        "valid_bin_masks": valid_bin_masks,
-        "valid_bin_fluxes": valid_bin_fluxes,
-        "valid_bin_errs": valid_bin_errs,
-        "quality_labels": quality_labels,
-        "quality_encoded": quality_encoded,
-        "all_bin_masks": all_bin_masks,
-        "good_quality_labels": good_quality_labels,
-        "good_quality_encoded": good_quality_encoded
-    }
-
-# If results already exist → load them
-else:
-    fit_results = st.session_state[gauss_key]
-    lw = fit_results["lw"]
-    lw_err = fit_results["lw_err"]
-    mean_fits = fit_results["mean_fits"]
-    mean_fits_errs = fit_results["mean_fits_errs"]
-    amp = fit_results["amp"]
-    amp_err = fit_results["amp_err"]
-    valid_bin_masks = fit_results["valid_bin_masks"]
-    valid_bin_fluxes = fit_results["valid_bin_fluxes"]
-    valid_bin_errs = fit_results["valid_bin_errs"]
-    quality_labels = fit_results["quality_labels"]
-    quality_encoded = fit_results["quality_encoded"]
-    all_bin_masks = fit_results["all_bin_masks"]
-    good_quality_labels = fit_results["good_quality_labels"]
-    good_quality_encoded = fit_results["good_quality_encoded"]
-
+    """
+    
 #we will begin our plotting of these linewidths now
 #compute average linewidths only from good and excellent regions (encoded as 2 or 3)
 lw_array = np.array(lw)  #shape: (n_valid_regions, n_lines)
