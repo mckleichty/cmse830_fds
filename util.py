@@ -496,10 +496,14 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             name='O-C',
             line=dict(color='purple')
         ), row=2, col=1)
-    
-        #fig.update_yaxes(title_text='Flux (Jy per pixel)', row=1, col=1)
-        #fig.update_yaxes(title_text='O-C (Jy per pixel)', row=2, col=1)
-        #fig.update_xaxes(title_text='Wavelength (μm)', row=2, col=1)
+
+        # --- Horizontal line at 0 for reference ---
+        fig.add_trace(go.Scatter(
+            x=wavelengths_fit,
+            y=np.zeros_like(wavelengths_fit),  # y=0 for all x
+            mode='lines',
+            line=dict(color='black', width=2)
+        ), row=2, col=1)
 
         fig.update_layout(
             xaxis=dict(
