@@ -438,7 +438,14 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
 
     #plot gaussian fit if the user wants to visualize
     if plot:
-        fig = go.Figure()
+
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                            row_heights=[0.7, 0.3],
+                            vertical_spacing=0.05,
+                            subplot_titles=[f"Gaussian Fit of the {title} line", "O-C Residuals"])
+    
+        # --- Original Data ---
+        #fig = go.Figure()
 
         #original data
         fig.add_trace(go.Scatter(
@@ -479,15 +486,33 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             line=dict(color='red')
         ))
 
-        fig.update_layout(
-            title=fr'Gaussian Fit of the {title} line',
-            legend=dict(title='Legend', title_font=dict(color='black')),
-            xaxis=dict(range=[peak_wavelength - 0.2, peak_wavelength + 0.2], title='Wavelength (μm)', title_font=dict(color='black'), tickfont=dict(color='black')),
-            yaxis=dict(title='Flux (Jy per pixel)', title_font=dict(color='black'), tickfont=dict(color='black')),
-            height=500
-        )
-
+        # --- O-C residuals ---
+        residuals = flux_fit - fit_vals
+        fig.add_trace(go.Scatter(
+            x=wavelengths_fit,
+            y=residuals,
+            mode='markers+lines',
+            name='O-C',
+            line=dict(color='purple'),
+            marker=dict(size=5)
+        ), row=2, col=1)
+    
+        fig.update_yaxes(title_text='Flux (Jy)', row=1, col=1)
+        fig.update_yaxes(title_text='O-C (Jy)', row=2, col=1)
+        fig.update_xaxes(title_text='Wavelength (μm)', row=2, col=1)
+    
+        fig.update_layout(height=600, showlegend=True)
         st.plotly_chart(fig, use_container_width=True)
+
+        #fig.update_layout(
+        #    title=fr'Gaussian Fit of the {title} line',
+        #    legend=dict(title='Legend', title_font=dict(color='black')),
+        #    xaxis=dict(range=[peak_wavelength - 0.2, peak_wavelength + 0.2], title='Wavelength (μm)', title_font=dict(color='black'), tickfont=dict(color='black')),
+        #    yaxis=dict(title='Flux (Jy per pixel)', title_font=dict(color='black'), tickfont=dict(color='black')),
+        #    height=500
+        #)
+
+        #st.plotly_chart(fig, use_container_width=True)
 
         #st.markdown("should also return chi^2 for these fits...")
 
