@@ -493,7 +493,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             x=wavelengths_fit,
             y=residuals,
             mode='lines',
-            name='O-C',
+            showlegend=False,
             line=dict(color='blue')
         ), row=2, col=1)
 
@@ -502,7 +502,8 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             x=wavelengths_fit,
             y=np.zeros_like(wavelengths_fit),  # y=0 for all x
             mode='lines',
-            line=dict(color='black', width=2)
+            line=dict(color='red', width=2),
+            showlegend=False
         ), row=2, col=1)
         
         # --- Reduced chi-squared ---
