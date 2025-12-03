@@ -283,6 +283,9 @@ with tab3:
         #start parallel execution
         with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
             results = list(executor.map(parallel.run_pixel_fit, tasks))
+
+        #after computing results
+        st.session_state["gaussian_results"] = results
             
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
@@ -536,6 +539,11 @@ with tab3:
 # --- TAB 4: Machine Learning second-component analysis ---
 with tab4:
     st.header("ML-Based Second Component Prediction")
+
+    results = st.session_state.get("gaussian_results", None)
+    #if results is None:
+        #st.error("Gaussian results not yet computed. Please run Tab 3 first.")
+    #else:
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
