@@ -643,20 +643,12 @@ with tab4:
         "Needs second component ✅" if needs_second_list[i] else "Single component is OK ✅"
     )
 
-    # --- Plot Gaussian fit + O-C ---
-    fit_vals = np.sum(
-        [amp[i][j] * np.exp(-((wavelengths - mean_fits[i][j])**2) / (2 * lw[i][j]**2)) 
-         for j in range(len(amp[i]))], axis=0
-    )
-    flux_fit = valid_bin_fluxes[i]
-    residuals = flux_fit - fit_vals
-
-    import plotly.graph_objects as go
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=wavelengths, y=flux_fit, mode='lines', name='Data'))
-    fig.add_trace(go.Scatter(x=wavelengths, y=fit_vals, mode='lines', name='Gaussian Fit'))
-    fig.add_trace(go.Scatter(x=wavelengths, y=residuals, mode='lines', name='O-C Residuals'))
-    st.plotly_chart(fig, use_container_width=True)
+    if st.checkbox("Show Gaussian fits?"):
+        x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x2')
+        y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y2')
+        i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
+        _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
+    
 """
 with tab4:
     st.header("ML-Based Second Component Prediction")
