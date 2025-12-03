@@ -284,9 +284,6 @@ with tab3:
         with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
             results = list(executor.map(parallel.run_pixel_fit, tasks))
 
-        #after computing results
-        st.session_state["gaussian_results"] = results
-            
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
         amp, amp_err = [], []
@@ -398,7 +395,8 @@ with tab3:
             "quality_encoded": quality_encoded,
             "all_bin_masks": all_bin_masks,
             "good_quality_labels": good_quality_labels,
-            "good_quality_encoded": good_quality_encoded
+            "good_quality_encoded": good_quality_encoded,
+            "gaussian_results": results
         }
     
     else:
@@ -418,6 +416,7 @@ with tab3:
         all_bin_masks = fit_results["all_bin_masks"]
         good_quality_labels = fit_results["good_quality_labels"]
         good_quality_encoded = fit_results["good_quality_encoded"]
+        results = fit_results["gaussian_results"]
         
     #we will begin our plotting of these linewidths now
     #compute average linewidths only from good and excellent regions (encoded as 2 or 3)
@@ -540,10 +539,8 @@ with tab3:
 with tab4:
     st.header("ML-Based Second Component Prediction")
 
-    results = st.session_state.get("gaussian_results", None)
-    #if results is None:
-        #st.error("Gaussian results not yet computed. Please run Tab 3 first.")
-    #else:
+    fit_results = st.session_state[gauss_key]
+    results = fit_results["gaussian_results"]
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
