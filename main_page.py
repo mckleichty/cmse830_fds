@@ -640,6 +640,17 @@ with tab4:
         needs_second_list.append(bool(rf_second.predict(features)[0]))
 
     st.session_state[gauss_key]["needs_second_component"] = needs_second_list
+
+    # --- create 2D spatial map of second-component prediction ---
+    second_component_map = np.zeros(bin_map.shape, dtype=int)
+    for y in range(bin_map.shape[0]):
+        for x in range(bin_map.shape[1]):
+            bin_idx = bin_map[y, x]
+            second_component_map[y, x] = int(needs_second_list[bin_idx])
+
+    st.subheader("Second Component Map")
+    st.image(second_component_map, caption="Pixels needing second component (1) vs single component (0)",
+             use_column_width=True, clamp=True)
     
     #i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
     #_, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
@@ -650,7 +661,7 @@ with tab4:
     peak_wavelength = peak_wavelengths[0]
     title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
     _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
-                    title, second_component_mask=np.array(needs_second_list), truncate_side=None, 
+                    title, second_component_mask=second_component_map, truncate_side=None, 
                     truncate_percent=0.0, plot=True)
     
 """
