@@ -445,9 +445,8 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
                             vertical_spacing=0.5,
                             subplot_titles=[f"Gaussian Fit of the {title} line", "O-C Residuals"])
         
-        # Set all subplot title colors to black
-        for annotation in fig['layout']['annotations']:
-            annotation['font'] = dict(color='black')
+        # Make subplot titles black
+        fig.update_annotations(font=dict(color='black'))
 
         #original data
         fig.add_trace(go.Scatter(
@@ -493,7 +492,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
         fig.add_trace(go.Scatter(
             x=wavelengths_fit,
             y=residuals,
-            mode='markers+lines',
+            mode='lines',
             name='O-C',
             line=dict(color='purple')#,
             #marker=dict(size=5)
