@@ -613,3 +613,145 @@ def impute_with_neighbors(data, quality, required_quality=1, min_neighbors=3):
     imputed_data[mask_to_impute] = filtered[mask_to_impute] #apply our average to imputed data 2d map
 
     return imputed_data
+
+def gaussian_fitter_test(peak_wavelength, fit_width, wavelengths, flux, flux_err, 
+                    title, second_component_mask=None, truncate_side=None, 
+                    truncate_percent=0.0, plot=False):
+    """
+    Fits a Gaussian on top of a linear baseline, with optional second Gaussian
+    component in regions indicated by second_component_mask.
+    
+    Parameters
+    ----------
+    peak_wavelength : float
+        Wavelength to center the first Gaussian.
+    fit_width : float
+        Range around peak_wavelength to fit.
+    wavelengths : np.array
+        Wavelength array.
+    flux : np.array
+        Flux array.
+    flux_err : np.array
+        Flux uncertainties.
+    title : str
+        Title for plot.
+    second_component_mask : np.array or None
+        Boolean array where 1 indicates a second Gaussian should be fitted.
+    truncate_side : str or None
+        'left', 'right', or None for truncation.
+    truncate_percent : float
+        Fraction of fit width to truncate.
+    plot : bool
+        Whether to plot the fit.
+        
+    Returns
+    -------
+    popt : array
+        Best-fit parameters (amp1, mean1, std1, [amp2, mean2, std2], slope, intercept)
+    stddev_fit : float
+        Linewidth of first Gaussian.
+    stddev_uncertainty : float
+        Uncertainty of first Gaussian's linewidth.
+    popt_errs : array
+        Errors on fit parameters.
+    """
+    
+    # --- Define fit region ---
+    fit_mask = (wavelengths > (peak_wavelength - fit_width)) & \
+               (wavelengths < (peak_wavelength + fit_width))
+    
+    wavelengths_fit = wavelengths[fit_mask]
+    flux_fit = flux[fit_mask]
+    flux_err_fit = flux_err[fit_mask]
+
+    # --- Truncate if needed ---
+    estimated_stddev = truncate_percent * fit_width
+    if truncate_side == 'left':
+        trunc_point = peak_wavelength - estimated_stddev
+        mask = wavelengths_fit > trunc_point
+        wavelengths_fit, flux_fit, flux_err_fit = wavelengths_fit[mask], flux_fit[mask], flux_err_fit[mask]
+    elif truncate_side == 'right':
+        trunc_point = peak_wavelength + estimated_stddev
+        mask = wavelengths_fit < trunc_point
+        wavelengths_fit, flux_fit, flux_err_fit = wavelengths_fit[mask], flux_fit[mask], flux_err_fit[mask]
+
+    # --- Determine if second Gaussian is needed ---
+    use_second = False
+    if second_component_mask is not None:
+        mask_fit_region = fit_mask  # mask over the original array
+        second_mask_fit = second_component_mask[mask_fit_region]
+        if second_mask_fit.any():
+            use_second = True
+
+    # --- Define models ---
+    if use_second:
+        def two_gaussians_with_baseline(x, a1, m1, s1, a2, m2, s2, slope, intercept):
+            return (gaussian(x, a1, m1, s1) + gaussian(x, a2, m2, s2) +
+                    slope * x + intercept)
+        initial_guess = [
+            np.max(flux_fit)-np.min(flux_fit), peak_wavelength, 0.01,  # first Gaussian
+            np.max(flux_fit)/2, peak_wavelength+0.01, 0.01,             # second Gaussian guess
+            0, np.min(flux_fit)                                         # linear baseline
+        ]
+        bounds_lower = [0, peak_wavelength-fit_width, 1e-5, 0, peak_wavelength-fit_width, 1e-5, -np.inf, -np.inf]
+        bounds_upper = [np.inf, peak_wavelength+fit_width, np.inf, np.inf, peak_wavelength+fit_width, np.inf, np.inf, np.inf]
+        model_func = two_gaussians_with_baseline
+    else:
+        model_func = gaussian_with_baseline
+        initial_guess = [np.max(flux_fit)-np.min(flux_fit), peak_wavelength, 0.01, 0, np.min(flux_fit)]
+        bounds_lower = [0, peak_wavelength-fit_width, 1e-5, -np.inf, -np.inf]
+        bounds_upper = [np.inf, peak_wavelength+fit_width, np.inf, np.inf, np.inf]
+
+    # --- Fit ---
+    try:
+        popt, pcov = curve_fit(model_func, wavelengths_fit, flux_fit, sigma=flux_err_fit,
+                               p0=initial_guess, maxfev=5000, bounds=(bounds_lower, bounds_upper))
+        popt_errs = np.sqrt(np.diag(pcov))
+    except (RuntimeError, ValueError):
+        return [np.nan]*len(initial_guess), np.nan, np.nan, np.array([np.nan]*len(initial_guess))
+    
+    # --- Stddev and uncertainty of first Gaussian ---
+    if use_second:
+        stddev_fit = popt[2]
+        stddev_uncertainty = np.sqrt(pcov[2, 2])
+    else:
+        stddev_fit = popt[2]
+        stddev_uncertainty = np.sqrt(pcov[2, 2])
+
+    # --- Optional plotting (reuse your code from above) ---
+    if plot:
+        fit_vals = model_func(wavelengths_fit, *popt)
+        
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                            row_heights=[0.7, 0.3],
+                            vertical_spacing=0.2,
+                            subplot_titles=[f"Gaussian Fit of the {title} line", "O-C Residuals"])
+        
+        # original data
+        fig.add_trace(go.Scatter(x=wavelengths, y=flux, mode='lines', name='Original Data', line=dict(color='blue')))
+        
+        # data used for fit
+        fig.add_trace(go.Scatter(x=wavelengths_fit, y=flux_fit, mode='lines', name='Data for Fit', line=dict(color='green')))
+        
+        # total fit
+        fig.add_trace(go.Scatter(x=wavelengths_fit, y=fit_vals, mode='lines', name='Total Fit', line=dict(color='red')))
+        
+        if use_second:
+            # first Gaussian
+            gauss1_vals = gaussian(wavelengths_fit, popt[0], popt[1], popt[2])
+            fig.add_trace(go.Scatter(x=wavelengths_fit, y=gauss1_vals, mode='lines', name='Gaussian 1', line=dict(color='orange', dash='dot')))
+            
+            # second Gaussian
+            gauss2_vals = gaussian(wavelengths_fit, popt[3], popt[4], popt[5])
+            fig.add_trace(go.Scatter(x=wavelengths_fit, y=gauss2_vals, mode='lines', name='Gaussian 2', line=dict(color='purple', dash='dot')))
+        
+        # O–C residuals
+        residuals = flux_fit - fit_vals
+        fig.add_trace(go.Scatter(x=wavelengths_fit, y=residuals, mode='lines', showlegend=False, line=dict(color='blue')), row=2, col=1)
+        
+        fig.add_trace(go.Scatter(x=wavelengths_fit, y=np.zeros_like(wavelengths_fit), mode='lines', line=dict(color='red', width=2), showlegend=False), row=2, col=1)
+        st.plotly_chart(fig, use_container_width=True)
+
+    return popt, stddev_fit, stddev_uncertainty, popt_errs
+
+                        
