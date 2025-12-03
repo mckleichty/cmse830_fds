@@ -272,9 +272,9 @@ with tab3:
     gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
     
     #check if we've already computed results for this SNR
-    #if gauss_key not in st.session_state:
+    if gauss_key not in st.session_state:
     # Only compute if either key is missing
-    if gauss_key not in st.session_state or gaussian_results_key not in st.session_state:
+    #if gauss_key not in st.session_state or gaussian_results_key not in st.session_state:
         
         #number of worker processes to use
         N_WORKERS = min(4, os.cpu_count())
@@ -287,7 +287,7 @@ with tab3:
             results = list(executor.map(parallel.run_pixel_fit, tasks))
         
         # cache results under snr-specific key
-        st.session_state[gaussian_results_key] = results
+        #st.session_state[gaussian_results_key] = results
 
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
