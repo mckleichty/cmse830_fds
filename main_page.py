@@ -637,7 +637,7 @@ with tab4:
 
     st.session_state[gauss_key]["needs_second_component"] = needs_second_list
 
-    _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelength, fit_width, wavelengths, flux, flux_err, 
+    _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelengths, fit_width, wavelengths, flux, flux_err, 
                     title, second_component_mask=np.array(needs_second_list), truncate_side=None, 
                     truncate_percent=0.0, plot=True)
     
