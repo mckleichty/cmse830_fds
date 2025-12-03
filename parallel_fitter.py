@@ -71,7 +71,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tru
 
     except (RuntimeError, ValueError):
         #if the fit fails, just return NaN vals
-        return [np.nan]*5, np.nan, np.nan, np.array([np.nan]*5)
+        return [np.nan]*5, np.nan, np.nan, np.array([np.nan]*5), np.nan
 
     #get the uncertainty in stddev_fit from the covariance matrix
     stddev_uncertainty = np.sqrt(pcov[2, 2])
@@ -94,8 +94,14 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tru
 
     #variance at each x: diagonal of J @ pcov @ J.T
     fit_uncertainty = np.sqrt(np.sum(J @ pcov * J, axis=1))
+
+    # --- Reduced chi-squared ---
+    residuals = flux_fit - fit_vals
+    chi2 = np.sum((residuals / flux_err_fit)**2)
+    dof = len(flux_fit) - 5  # 5 fitted params: amp, mean, stddev, slope, intercept
+    chi2_red = chi2 / dof
     
-    return popt, stddev_fit, stddev_uncertainty, popt_errs
+    return popt, stddev_fit, stddev_uncertainty, popt_errs, chi2_red
 
 def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, region_flux, region_flux_err):
     """
@@ -105,9 +111,10 @@ def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, regio
     """
     lws, lws_err, mean_fits, mean_fits_errs = [], [], [], []
     amp_fits, amp_fit_errs = [], []
+    chi2_red = []
 
     for i in range(len(peak_wavelengths)):
-        popt, lw, lw_err, popt_errs = gaussian_fitter(
+        popt, lw, lw_err, popt_errs, chi2_red_ = gaussian_fitter(
             peak_wavelengths[i], fit_width,
             wavelengths, region_flux, region_flux_err
         )
@@ -117,9 +124,11 @@ def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, regio
         mean_fits_errs.append(popt_errs[1])
         amp_fits.append(popt[0])
         amp_fit_errs.append(popt_errs[0])
+        chi2_red.append(chi2_red_)
 
-    return lws, lws_err, mean_fits, mean_fits_errs, amp_fits, amp_fit_errs
+    return lws, lws_err, mean_fits, mean_fits_errs, amp_fits, amp_fit_errs, chi2_red
 
 def run_pixel_fit(args):
     """Wrapper for multiprocessing."""
     return extracted_vals_from_gaussian(*args)
+    
