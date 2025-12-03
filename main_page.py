@@ -267,6 +267,7 @@ with tab3:
     
     #define session key
     gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
+    gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
     
     #check if we've already computed results for this SNR
     if gauss_key not in st.session_state:
@@ -281,9 +282,8 @@ with tab3:
         with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
             results = list(executor.map(parallel.run_pixel_fit, tasks))
         
-        #cache raw Gaussian results separately
-        st.session_state.gaussian_results = results
-        results = st.session_state.gaussian_results
+        # cache results under snr-specific key
+        st.session_state[gaussian_results_key] = results
 
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
@@ -538,8 +538,8 @@ with tab3:
 with tab4:
     st.header("ML-Based Second Component Prediction")
 
-    # Load cached raw Gaussian results
-    bin_fluxes = st.session_state.gaussian_results
+    gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
+    results = st.session_state[gaussian_results_key]
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
