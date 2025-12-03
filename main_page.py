@@ -259,6 +259,10 @@ if st.checkbox("Show Gaussian fits?"):
     _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
     #st.write("calculate chi^2 for this fit?")
 
+def run_pixel_fit(args):
+    """Wrapper for multiprocessing."""
+    return parallel.extracted_vals_from_gaussian(*args)
+
 #define session key
 gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
 
@@ -275,11 +279,8 @@ if gauss_key not in st.session_state:
 
     #start parallel execution
     with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
-        results = list(executor.map(
-            lambda args: parallel.extracted_vals_from_gaussian(*args),
-            tasks
-        ))
-
+        results = list(executor.map(run_pixel_fit, tasks))
+        
     #unpack all results from parallel workers
     lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
     amp, amp_err = [], []
