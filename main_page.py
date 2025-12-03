@@ -283,6 +283,7 @@ with tab3:
         
         #cache raw Gaussian results separately
         st.session_state.gaussian_results = results
+        results = st.session_state.gaussian_results
 
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
