@@ -579,15 +579,28 @@ with tab4:
     bin_errors = st.session_state.bin_errors
     bin_map = st.session_state.bin_map
 
-    st.write(chi2_red)
-    image_shape = valid_bin_masks[0].shape
-    chi2_map = np.full(image_shape, np.nan)
+    n_lines = len(chi2_red[0])  # e.g., 3 emission lines
+    chi2_maps = [np.full(image_shape, np.nan) for _ in range(n_lines)]
+    
     for i, mask in enumerate(valid_bin_masks):
-        chi2_map[mask] = chi2_red[i]
+        for line_idx in range(n_lines):
+            chi2_maps[line_idx][mask] = chi2_red[i][line_idx]
+
+    #image_shape = valid_bin_masks[0].shape
+    #chi2_map = np.full(image_shape, np.nan)
+    #for i, mask in enumerate(valid_bin_masks):
+        #chi2_map[mask] = chi2_red[i]
 
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
-    second_component_label = (chi2_map > chi2_threshold).astype(int)
+    second_component_label = (chi2_maps[0] > chi2_threshold).astype(int)
+
+    fig = px.imshow(second_component_label, 
+                color_continuous_scale='RdBu_r', 
+                origin='lower',
+                labels={'color':'Second Component'},
+                title="Pixels needing second component (1 = yes, 0 = no)")
+    st.plotly_chart(fig, use_container_width=True)
 
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
