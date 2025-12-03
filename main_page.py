@@ -571,14 +571,19 @@ with tab4:
     amp = fit_results["amp"]
     amp_err = fit_results["amp_err"]
     valid_bin_fluxes = fit_results["valid_bin_fluxes"]
+    valid_bin_masks = fit_results["valid_bin_masks"]
     chi2_red = fit_results["chi2_red"]
+    
     peak_wavelengths = st.session_state.peak_wavelengths
     bin_fluxes = st.session_state.bin_fluxes
     bin_errors = st.session_state.bin_errors
     bin_map = st.session_state.bin_map
-    #bin_masks = st.session_state.bin_masks
 
     st.write(chi2_red)
+    image_shape = valid_bin_masks[0].shape
+    chi2_map = np.full(image_shape, np.nan)
+    for i, mask in enumerate(valid_bin_masks):
+        chi2_map[mask] = chi2_red[i]
 
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
