@@ -559,19 +559,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
         #fig.update_layout(height=600, showlegend=True)
         st.plotly_chart(fig, use_container_width=True)
 
-        #fig.update_layout(
-        #    title=fr'Gaussian Fit of the {title} line',
-        #    legend=dict(title='Legend', title_font=dict(color='black')),
-        #    xaxis=dict(range=[peak_wavelength - 0.2, peak_wavelength + 0.2], title='Wavelength (μm)', title_font=dict(color='black'), tickfont=dict(color='black')),
-        #    yaxis=dict(title='Flux (Jy per pixel)', title_font=dict(color='black'), tickfont=dict(color='black')),
-        #    height=500
-        #)
-
-        #st.plotly_chart(fig, use_container_width=True)
-
-        #st.markdown("should also return chi^2 for these fits...")
-
-    return popt, stddev_fit, stddev_uncertainty, popt_errs
+    return popt, stddev_fit, stddev_uncertainty, popt_errs, chi2_red
 
 def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, region_flux, region_flux_err, plot = False):
     """
@@ -581,10 +569,11 @@ def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, regio
     """
     lws, lws_err, mean_fits, mean_fits_errs = [], [], [], []
     amp_fits, amp_fit_errs = [], []
+    chi2_red = []
     
     titles = ['H2(S2)', '[NeII]', '[NeIII]']
     for i in range(len(peak_wavelengths)): #for each peak wavelength...
-        popt, lw, lw_err, popt_errs = gaussian_fitter(peak_wavelengths[i], fit_width, wavelengths, region_flux, region_flux_err, titles[i], plot = plot)
+        popt, lw, lw_err, popt_errs, chi2_red_ = gaussian_fitter(peak_wavelengths[i], fit_width, wavelengths, region_flux, region_flux_err, titles[i], plot = plot)
         #popt = amp_fit, mean_fit, stddev_fit, slope_fit, intercept_fit
         lws.append(lw)
         lws_err.append(lw_err)
@@ -592,8 +581,9 @@ def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, regio
         mean_fits_errs.append(popt_errs[1])
         amp_fits.append(popt[0])
         amp_fit_errs.append(popt_errs[0])
+        chi2_red.append(chi2_red_)
 
-    return lws, lws_err, mean_fits, mean_fits_errs, amp_fits, amp_fit_errs
+    return lws, lws_err, mean_fits, mean_fits_errs, amp_fits, amp_fit_errs, chi2_red
 
 def impute_with_neighbors(data, quality, required_quality=1, min_neighbors=3):
     """
