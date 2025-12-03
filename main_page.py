@@ -9,6 +9,7 @@ from io import BytesIO
 from concurrent.futures import ProcessPoolExecutor
 from sklearn.ensemble import RandomForestClassifier
 import plotly.graph_objects as go
+import plotly.express as px
 
 #importing files I wrote
 import util as util #useful functions that would otherwise clutter this file up
