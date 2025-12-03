@@ -498,11 +498,43 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             marker=dict(size=5)
         ), row=2, col=1)
     
-        fig.update_yaxes(title_text='Flux (Jy)', row=1, col=1)
-        fig.update_yaxes(title_text='O-C (Jy)', row=2, col=1)
-        fig.update_xaxes(title_text='Wavelength (μm)', row=2, col=1)
+        #fig.update_yaxes(title_text='Flux (Jy per pixel)', row=1, col=1)
+        #fig.update_yaxes(title_text='O-C (Jy per pixel)', row=2, col=1)
+        #fig.update_xaxes(title_text='Wavelength (μm)', row=2, col=1)
+
+        fig.update_layout(
+            xaxis=dict(
+                range=[peak_wavelength - 0.2, peak_wavelength + 0.2],
+                title='Wavelength (μm)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            xaxis2=dict(  # bottom subplot for residuals
+                range=[peak_wavelength - 0.2, peak_wavelength + 0.2],
+                title='Wavelength (μm)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            yaxis=dict(
+                title='Flux (Jy)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            yaxis2=dict(
+                title='O-C (Jy)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            legend=dict(
+                title='Legend',
+                title_font=dict(color='black'),
+                font=dict(color='black')
+            ),
+            height=600
+        )
+
     
-        fig.update_layout(height=600, showlegend=True)
+        #fig.update_layout(height=600, showlegend=True)
         st.plotly_chart(fig, use_container_width=True)
 
         #fig.update_layout(
