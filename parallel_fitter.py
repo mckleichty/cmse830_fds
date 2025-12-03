@@ -119,3 +119,7 @@ def extracted_vals_from_gaussian(peak_wavelengths, fit_width, wavelengths, regio
         amp_fit_errs.append(popt_errs[0])
 
     return lws, lws_err, mean_fits, mean_fits_errs, amp_fits, amp_fit_errs
+
+def run_pixel_fit(args):
+    """Wrapper for multiprocessing."""
+    return extracted_vals_from_gaussian(*args)
