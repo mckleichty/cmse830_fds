@@ -7,6 +7,7 @@ from scipy.signal import find_peaks
 from sklearn.preprocessing import OrdinalEncoder
 from io import BytesIO
 from concurrent.futures import ProcessPoolExecutor
+from sklearn.ensemble import RandomForestClassifier
 
 #importing files I wrote
 import util as util #useful functions that would otherwise clutter this file up
