@@ -302,7 +302,7 @@ if gauss_key not in st.session_state:
         all_bin_masks.append(bin_masks[i])
 
         #fit gaussian model to each pixel, return linewidth and other values from this fit
-        lws_, lw_err_, mean_fit_, mean_fit_err_, amp_, amp_err_ = res
+        lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_ = res
         #lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i])
         
         #if any of the fits returned NaN vals, this is obviously a failed fit
