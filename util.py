@@ -442,7 +442,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
 
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                             row_heights=[0.7, 0.3],
-                            vertical_spacing=0.5,
+                            vertical_spacing=0.1,
                             subplot_titles=[f"Gaussian Fit of the {title} line", "O-C Residuals"])
         
         # Make subplot titles black
@@ -494,8 +494,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             y=residuals,
             mode='lines',
             name='O-C',
-            line=dict(color='purple')#,
-            #marker=dict(size=5)
+            line=dict(color='purple')
         ), row=2, col=1)
     
         #fig.update_yaxes(title_text='Flux (Jy per pixel)', row=1, col=1)
