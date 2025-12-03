@@ -610,7 +610,8 @@ with tab4:
             np.std(residuals), np.max(flux_fit)-np.min(flux_fit)
         ]
         features = np.array(features).reshape(1, -1)
-        needs_second = rf_second.predict(features)[0] if len(X_train) > 0 else False
+        #needs_second = rf_second.predict(features)[0] if len(X_train) > 0 else False
+        needs_second = rf_second.predict(features)[0] if rf_second is not None else False
         needs_second_list.append(bool(needs_second))
 
     st.session_state[gauss_key]["needs_second_component"] = needs_second_list
