@@ -319,10 +319,6 @@ with tab3:
             all_bin_masks.append(bin_masks[i])
     
             #fit gaussian model to each pixel, return linewidth and other values from this fit
-            #lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_, chi2_red_ = res
-            if len(res) < 7:
-                # fallback in case parallel output was corrupted
-                res = list(res) + [np.nan]*(7 - len(res))
             lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_, chi2_red_ = res
             #lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i])
             
