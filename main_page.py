@@ -121,6 +121,10 @@ with tab2:
     #find peaks in our spectrum
     peaks, _ = find_peaks(flux, height=50000, distance = 200, prominence=10, width = 5, threshold = 700)
     peak_wavelengths = wavelengths[peaks]
+
+    #saving to session state
+    st.session_state.peak_wavelengths = peak_wavelengths
+    peak_wavelengths = st.session_state.peak_wavelengths
     
     ####################################################
     ## IMAGE 1: side by side total image and spectrum ##
