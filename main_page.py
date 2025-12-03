@@ -644,8 +644,8 @@ with tab4:
     )
 
     if st.checkbox("Show Gaussian fits?"):
-        x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x2')
-        y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y2')
+        x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
+        y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
         i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
         _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
     
