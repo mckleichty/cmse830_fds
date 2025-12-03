@@ -607,10 +607,11 @@ with tab4:
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
     y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
     i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
-    peak_wavelength = peak_wavelengths[0]
+    j = 0 #h2s2 emission line
+    peak_wavelength = peak_wavelengths[j]
     title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
     _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
-                    title, second_component_mask=second_component_map, truncate_side=None, 
+                    title, second_component_mask=chi2_maps[j], truncate_side=None, 
                     truncate_percent=0.0, plot=True)
     
 """
