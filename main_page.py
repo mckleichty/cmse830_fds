@@ -270,7 +270,9 @@ with tab3:
     gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
     
     #check if we've already computed results for this SNR
-    if gauss_key not in st.session_state:
+    #if gauss_key not in st.session_state:
+    # Only compute if either key is missing
+    if gauss_key not in st.session_state or gaussian_results_key not in st.session_state:
         
         #number of worker processes to use
         N_WORKERS = min(4, os.cpu_count())
@@ -539,7 +541,10 @@ with tab4:
     st.header("ML-Based Second Component Prediction")
 
     gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
-    results = st.session_state[gaussian_results_key]
+    if gaussian_results_key not in st.session_state:
+        st.warning("Gaussian fits have not been computed yet. Please run Tab 3 first!")
+    else:
+        results = st.session_state[gaussian_results_key]
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
