@@ -15,6 +15,7 @@ from spectral_cube import SpectralCube
 import streamlit as st
 from scipy.optimize import curve_fit
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from scipy.ndimage import generic_filter
 from vorbin.voronoi_2d_binning import voronoi_2d_binning
 import plotly.express as px
