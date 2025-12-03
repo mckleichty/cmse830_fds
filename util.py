@@ -494,7 +494,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             y=residuals,
             mode='lines',
             name='O-C',
-            line=dict(color='purple')
+            line=dict(color='blue')
         ), row=2, col=1)
 
         # --- Horizontal line at 0 for reference ---
