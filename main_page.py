@@ -272,7 +272,7 @@ with tab3:
     #check if we've already computed results for this SNR
     if gauss_key not in st.session_state:
         #progress bar
-        st.write("Computing Gaussian fits in parallel...")
+        #st.write("Computing Gaussian fits in parallel...")
     
         #number of worker processes to use
         N_WORKERS = min(4, os.cpu_count())
@@ -538,9 +538,7 @@ with tab3:
 # --- TAB 4: Machine Learning second-component analysis ---
 with tab4:
     st.header("ML-Based Second Component Prediction")
-
-    fit_results = st.session_state[gauss_key]
-    results = fit_results["gaussian_results"]
+    results = st.session_state.gaussian_results
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
