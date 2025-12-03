@@ -269,7 +269,7 @@ with tab3:
         x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x2')
         y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y2')
         i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
-        _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
+        _, _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
     
     #define session key
     gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
@@ -296,6 +296,7 @@ with tab3:
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
         amp, amp_err = [], []
+        chi2_red = []
     
         #ChatGPT-4o was used on Oct 11, 2025 to generate the code for the ordinal encoder (because I have never used encoders before)
         #define encoder and fit it on the quality categories
@@ -318,7 +319,7 @@ with tab3:
             all_bin_masks.append(bin_masks[i])
     
             #fit gaussian model to each pixel, return linewidth and other values from this fit
-            lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_ = res
+            lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_, chi2_red_ = res
             #lw_, lw_err_, mean_fit, mean_fit_errs, amp_, amp_err_ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i])
             
             #if any of the fits returned NaN vals, this is obviously a failed fit
@@ -388,6 +389,7 @@ with tab3:
             valid_bin_masks.append(bin_masks[i])
             valid_bin_fluxes.append(bin_fluxes[i])
             valid_bin_errs.append(bin_errors[i])
+            chi2_red.append(chi2_red_)
     
         #cache all results in session state because this function takes even longer to run
         st.session_state[gauss_key] = {
@@ -404,7 +406,8 @@ with tab3:
             "quality_encoded": quality_encoded,
             "all_bin_masks": all_bin_masks,
             "good_quality_labels": good_quality_labels,
-            "good_quality_encoded": good_quality_encoded
+            "good_quality_encoded": good_quality_encoded,
+            "chi2_red": chi2_red,
         }
     
     else:
@@ -424,6 +427,7 @@ with tab3:
         all_bin_masks = fit_results["all_bin_masks"]
         good_quality_labels = fit_results["good_quality_labels"]
         good_quality_encoded = fit_results["good_quality_encoded"]
+        chi2_red = fit_results["chi2_red"]
         
     #we will begin our plotting of these linewidths now
     #compute average linewidths only from good and excellent regions (encoded as 2 or 3)
@@ -567,11 +571,14 @@ with tab4:
     amp = fit_results["amp"]
     amp_err = fit_results["amp_err"]
     valid_bin_fluxes = fit_results["valid_bin_fluxes"]
+    chi2_red = fit_results["chi2_red"]
     peak_wavelengths = st.session_state.peak_wavelengths
     bin_fluxes = st.session_state.bin_fluxes
     bin_errors = st.session_state.bin_errors
     bin_map = st.session_state.bin_map
     #bin_masks = st.session_state.bin_masks
+
+    st.write(chi2_red)
 
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
