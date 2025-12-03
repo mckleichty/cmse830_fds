@@ -504,7 +504,25 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
             mode='lines',
             line=dict(color='black', width=2)
         ), row=2, col=1)
+        
+        # --- Reduced chi-squared ---
+        chi2 = np.sum((residuals / flux_err_fit)**2)
+        dof = len(flux_fit) - 5  # 5 fitted params: amp, mean, stddev, slope, intercept
+        chi2_red = chi2 / dof
+        
+        # Add annotation to the upper left corner of the O-C subplot
+        fig.add_annotation(
+            x=wavelengths_fit[0],                  # leftmost x
+            y=max(residuals) * 0.9,                # near top of residuals
+            text=f"Reduced χ² = {chi2_red:.2f}",
+            showarrow=False,
+            font=dict(color='black', size=12),
+            xref='x',                               # refers to x-axis of O-C subplot
+            yref='y2',                              # refers to y-axis of second subplot (row=2)
+            align='left'
+        )
 
+        #figure updates
         fig.update_layout(
             xaxis=dict(
                 range=[peak_wavelength - 0.2, peak_wavelength + 0.2],
