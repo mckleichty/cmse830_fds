@@ -542,6 +542,16 @@ with tab3:
 #
 #""")
 
+def reduced_chi_squared(flux, flux_err, fit_vals, num_params):
+    """
+    Compute reduced chi-squared.
+    """
+    residuals = flux - fit_vals
+    chi2 = np.sum((residuals / flux_err)**2)
+    dof = len(flux) - num_params
+    return chi2 / dof
+
+
 # --- TAB 4: Machine Learning second-component analysis ---
 with tab4:
     st.header("ML-Based Second Component Prediction")
@@ -563,100 +573,10 @@ with tab4:
     bin_map = st.session_state.bin_map
     #bin_masks = st.session_state.bin_masks
 
-    # --- Train or load Random Forest model ---
-    rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
+    chi2_threshold = 3.0
+    # chi2_map is 2D array of reduced chi^2 for each pixel
+    second_component_label = (chi2_map > chi2_threshold).astype(int)
 
-    if rf_key not in st.session_state:
-        st.write("Training Random Forest for second-component prediction...")
-
-        # Build features from the already-cleaned fit results
-        X_train = []
-        y_train = []
-
-        for i in range(len(lw)):
-            # Skip if any NaNs remain
-            if np.any(np.isnan(lw[i])) or np.any(np.isnan(lw_err[i])):
-                continue
-
-            # Feature vector: you can customize features here
-            residuals = valid_bin_fluxes[i] - np.sum(
-                [amp[i][j] * np.exp(-((wavelengths - mean_fits[i][j])**2) / (2 * lw[i][j]**2)) 
-                 for j in range(len(amp[i]))], axis=0
-            )
-            chi2_red = np.sum((residuals / (np.std(residuals)+1e-8))**2) / (len(valid_bin_fluxes[i])-5)
-
-            features = [
-                np.mean(lw[i]),
-                np.mean(lw_err[i]),
-                np.mean(amp[i]),
-                np.mean(amp_err[i]),
-                np.mean(mean_fits_errs[i]),
-                np.max(np.abs(residuals)),
-                chi2_red,
-                np.std(residuals),
-                np.max(valid_bin_fluxes[i]) - np.min(valid_bin_fluxes[i])
-            ]
-            X_train.append(features)
-            y_train.append(int(chi2_red > 2.0))  # Label: needs second component?
-
-        X_train = np.array(X_train)
-        y_train = np.array(y_train)
-
-        from sklearn.ensemble import RandomForestClassifier
-        rf_second = RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42)
-        if len(X_train) > 0:
-            rf_second.fit(X_train, y_train)
-
-        st.session_state[rf_key] = rf_second
-    else:
-        rf_second = st.session_state[rf_key]
-
-    # --- Predict second-component necessity for all pixels ---
-    needs_second_list = []
-
-    for i in range(len(lw)):
-        if np.any(np.isnan(lw[i])) or np.any(np.isnan(lw_err[i])):
-            needs_second_list.append(False)
-            continue
-
-        residuals = valid_bin_fluxes[i] - np.sum(
-            [amp[i][j] * np.exp(-((wavelengths - mean_fits[i][j])**2) / (2 * lw[i][j]**2)) 
-             for j in range(len(amp[i]))], axis=0
-        )
-        chi2_red = np.sum((residuals / (np.std(residuals)+1e-8))**2) / (len(valid_bin_fluxes[i])-5)
-
-        features = np.array([
-            np.mean(lw[i]),
-            np.mean(lw_err[i]),
-            np.mean(amp[i]),
-            np.mean(amp_err[i]),
-            np.mean(mean_fits_errs[i]),
-            np.max(np.abs(residuals)),
-            chi2_red,
-            np.std(residuals),
-            np.max(valid_bin_fluxes[i]) - np.min(valid_bin_fluxes[i])
-        ]).reshape(1, -1)
-
-        needs_second_list.append(bool(rf_second.predict(features)[0]))
-
-    st.session_state[gauss_key]["needs_second_component"] = needs_second_list
-
-    # --- create 2D spatial map of second-component prediction ---
-    second_component_map = np.zeros(bin_map.shape, dtype=int)
-    for y in range(bin_map.shape[0]):
-        for x in range(bin_map.shape[1]):
-            bin_idx = bin_map[y, x]
-            if bin_idx < len(needs_second_list):  # <-- check index is valid
-                second_component_map[y, x] = int(needs_second_list[bin_idx])
-            else:
-                second_component_map[y, x] = 0  # default to single component
-
-    st.subheader("Second Component Map")
-    st.image(second_component_map, caption="Pixels needing second component (1) vs single component (0)",
-             use_column_width=True, clamp=True)
-    
-    #i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
-    #_, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
     y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
