@@ -10,7 +10,7 @@ def gaussian_with_baseline(x, amp, mean, stddev, slope, intercept):
     baseline = slope * x + intercept
     return gaussian + baseline
 
-def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, title, truncate_side = None, truncate_percent = 0.0, plot = False):
+def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, truncate_side = None, truncate_percent = 0.0, plot = False):
     """
     Fits a Gaussian on top of a linear baseline at a given peak_wavelength 
     and returns the fit parameters. Allows optional truncation of one side.
