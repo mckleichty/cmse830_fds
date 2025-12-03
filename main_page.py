@@ -538,7 +538,12 @@ with tab3:
 # --- TAB 4: Machine Learning second-component analysis ---
 with tab4:
     st.header("ML-Based Second Component Prediction")
-    results = st.session_state.gaussian_results
+
+    fit_results = st.session_state[gauss_key]
+    results = fit_results.get("gaussian_results", [])
+    if len(results) == 0:
+        st.warning("Gaussian results are missing! Please rerun the 'Calculating Linewidths' tab first.")
+    #results = st.session_state.gaussian_results
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
