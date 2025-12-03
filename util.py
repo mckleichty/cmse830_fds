@@ -437,6 +437,13 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
     #variance at each x: diagonal of J @ pcov @ J.T
     fit_uncertainty = np.sqrt(np.sum(J @ pcov * J, axis=1))
 
+    # --- Reduced chi-squared ---
+    residuals = flux_fit - fit_vals
+    
+    chi2 = np.sum((residuals / flux_err_fit)**2)
+    dof = len(flux_fit) - 5  # 5 fitted params: amp, mean, stddev, slope, intercept
+    chi2_red = chi2 / dof
+    
     #plot gaussian fit if the user wants to visualize
     if plot:
 
@@ -488,7 +495,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
         ))
 
         # --- O-C residuals ---
-        residuals = flux_fit - fit_vals
+        #residuals = flux_fit - fit_vals
         fig.add_trace(go.Scatter(
             x=wavelengths_fit,
             y=residuals,
@@ -507,9 +514,9 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
         ), row=2, col=1)
         
         # --- Reduced chi-squared ---
-        chi2 = np.sum((residuals / flux_err_fit)**2)
-        dof = len(flux_fit) - 5  # 5 fitted params: amp, mean, stddev, slope, intercept
-        chi2_red = chi2 / dof
+        #chi2 = np.sum((residuals / flux_err_fit)**2)
+        #dof = len(flux_fit) - 5  # 5 fitted params: amp, mean, stddev, slope, intercept
+        #chi2_red = chi2 / dof
         
         # Add annotation to the upper left corner of the O-C subplot
         fig.add_annotation(
