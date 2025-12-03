@@ -542,6 +542,125 @@ with tab3:
 with tab4:
     st.header("ML-Based Second Component Prediction")
 
+    # Load cached processed Gaussian results from Tab 3
+    gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
+    fit_results = st.session_state[gauss_key]
+
+    lw = fit_results["lw"]
+    lw_err = fit_results["lw_err"]
+    mean_fits = fit_results["mean_fits"]
+    mean_fits_errs = fit_results["mean_fits_errs"]
+    amp = fit_results["amp"]
+    amp_err = fit_results["amp_err"]
+    valid_bin_fluxes = fit_results["valid_bin_fluxes"]
+
+    # --- Train or load Random Forest model ---
+    rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
+
+    if rf_key not in st.session_state:
+        st.write("Training Random Forest for second-component prediction...")
+
+        # Build features from the already-cleaned fit results
+        X_train = []
+        y_train = []
+
+        for i in range(len(lw)):
+            # Skip if any NaNs remain
+            if np.any(np.isnan(lw[i])) or np.any(np.isnan(lw_err[i])):
+                continue
+
+            # Feature vector: you can customize features here
+            residuals = valid_bin_fluxes[i] - np.sum(
+                [amp[i][j] * np.exp(-((wavelengths - mean_fits[i][j])**2) / (2 * lw[i][j]**2)) 
+                 for j in range(len(amp[i]))], axis=0
+            )
+            chi2_red = np.sum((residuals / (np.std(residuals)+1e-8))**2) / (len(valid_bin_fluxes[i])-5)
+
+            features = [
+                np.mean(lw[i]),
+                np.mean(lw_err[i]),
+                np.mean(amp[i]),
+                np.mean(amp_err[i]),
+                np.mean(mean_fits_errs[i]),
+                np.max(np.abs(residuals)),
+                chi2_red,
+                np.std(residuals),
+                np.max(valid_bin_fluxes[i]) - np.min(valid_bin_fluxes[i])
+            ]
+            X_train.append(features)
+            y_train.append(int(chi2_red > 2.0))  # Label: needs second component?
+
+        X_train = np.array(X_train)
+        y_train = np.array(y_train)
+
+        from sklearn.ensemble import RandomForestClassifier
+        rf_second = RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42)
+        if len(X_train) > 0:
+            rf_second.fit(X_train, y_train)
+
+        st.session_state[rf_key] = rf_second
+    else:
+        rf_second = st.session_state[rf_key]
+
+    # --- Predict second-component necessity for all pixels ---
+    needs_second_list = []
+
+    for i in range(len(lw)):
+        if np.any(np.isnan(lw[i])) or np.any(np.isnan(lw_err[i])):
+            needs_second_list.append(False)
+            continue
+
+        residuals = valid_bin_fluxes[i] - np.sum(
+            [amp[i][j] * np.exp(-((wavelengths - mean_fits[i][j])**2) / (2 * lw[i][j]**2)) 
+             for j in range(len(amp[i]))], axis=0
+        )
+        chi2_red = np.sum((residuals / (np.std(residuals)+1e-8))**2) / (len(valid_bin_fluxes[i])-5)
+
+        features = np.array([
+            np.mean(lw[i]),
+            np.mean(lw_err[i]),
+            np.mean(amp[i]),
+            np.mean(amp_err[i]),
+            np.mean(mean_fits_errs[i]),
+            np.max(np.abs(residuals)),
+            chi2_red,
+            np.std(residuals),
+            np.max(valid_bin_fluxes[i]) - np.min(valid_bin_fluxes[i])
+        ]).reshape(1, -1)
+
+        needs_second_list.append(bool(rf_second.predict(features)[0]))
+
+    st.session_state[gauss_key]["needs_second_component"] = needs_second_list
+
+    # --- Interactive pixel selection ---
+    st.subheader("Check Pixel for Second Component")
+    x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim-1, value=18, key='ml_x')
+    y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim-1, value=15, key='ml_y')
+    i = bin_map[y_pixel][x_pixel]
+
+    st.write(
+        f"Prediction for pixel ({x_pixel}, {y_pixel}):",
+        "Needs second component ✅" if needs_second_list[i] else "Single component is OK ✅"
+    )
+
+    # --- Plot Gaussian fit + O-C ---
+    fit_vals = np.sum(
+        [amp[i][j] * np.exp(-((wavelengths - mean_fits[i][j])**2) / (2 * lw[i][j]**2)) 
+         for j in range(len(amp[i]))], axis=0
+    )
+    flux_fit = valid_bin_fluxes[i]
+    residuals = flux_fit - fit_vals
+
+    import plotly.graph_objects as go
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=wavelengths, y=flux_fit, mode='lines', name='Data'))
+    fig.add_trace(go.Scatter(x=wavelengths, y=fit_vals, mode='lines', name='Gaussian Fit'))
+    fig.add_trace(go.Scatter(x=wavelengths, y=residuals, mode='lines', name='O-C Residuals'))
+    st.plotly_chart(fig, use_container_width=True)
+"""
+with tab4:
+    st.header("ML-Based Second Component Prediction")
+
     gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
     if gaussian_results_key not in st.session_state:
         st.warning("Gaussian fits have not been computed yet. Please run Tab 3 first!")
@@ -637,3 +756,4 @@ with tab4:
     fig.add_trace(go.Scatter(x=wavelengths, y=fit_vals, mode='lines', name='Gaussian Fit'))
     fig.add_trace(go.Scatter(x=wavelengths, y=residuals, mode='lines', name='O-C Residuals'))
     st.plotly_chart(fig, use_container_width=True)
+"""
