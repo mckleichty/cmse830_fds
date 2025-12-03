@@ -557,6 +557,7 @@ with tab4:
     amp = fit_results["amp"]
     amp_err = fit_results["amp_err"]
     valid_bin_fluxes = fit_results["valid_bin_fluxes"]
+    peak_wavelengths = st.session_state.peak_wavelengths
 
     # --- Train or load Random Forest model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
