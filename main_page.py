@@ -264,10 +264,11 @@ with tab3:
         y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y2')
         i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
         _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
-        #st.write("calculate chi^2 for this fit?")
     
     #define session key
     gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
+    # Define a separate key for raw Gaussian results
+    gaussian_results_key = f"gaussian_results_{st.session_state.snr_used}"
     
     #check if we've already computed results for this SNR
     if gauss_key not in st.session_state:
@@ -283,6 +284,10 @@ with tab3:
         #start parallel execution
         with ProcessPoolExecutor(max_workers=N_WORKERS) as executor:
             results = list(executor.map(parallel.run_pixel_fit, tasks))
+        
+        # Only cache if not already in session state
+        if gaussian_results_key not in st.session_state:
+            st.session_state[gaussian_results_key] = results  # results from your parallel fit
 
         #unpack all results from parallel workers
         lw, lw_err, mean_fits, mean_fits_errs = [], [], [], []
@@ -395,8 +400,7 @@ with tab3:
             "quality_encoded": quality_encoded,
             "all_bin_masks": all_bin_masks,
             "good_quality_labels": good_quality_labels,
-            "good_quality_encoded": good_quality_encoded,
-            "gaussian_results": results
+            "good_quality_encoded": good_quality_encoded
         }
     
     else:
@@ -416,7 +420,6 @@ with tab3:
         all_bin_masks = fit_results["all_bin_masks"]
         good_quality_labels = fit_results["good_quality_labels"]
         good_quality_encoded = fit_results["good_quality_encoded"]
-        results = fit_results["gaussian_results"]
         
     #we will begin our plotting of these linewidths now
     #compute average linewidths only from good and excellent regions (encoded as 2 or 3)
@@ -539,11 +542,8 @@ with tab3:
 with tab4:
     st.header("ML-Based Second Component Prediction")
 
-    fit_results = st.session_state[gauss_key]
-    results = fit_results.get("gaussian_results", [])
-    if len(results) == 0:
-        st.warning("Gaussian results are missing! Please rerun the 'Calculating Linewidths' tab first.")
-    #results = st.session_state.gaussian_results
+    # Later, in Tab 4, access safely
+    results = st.session_state[gaussian_results_key]
 
     # --- train or load RF model ---
     rf_key = f"rf_second_component_snr_{st.session_state.snr_used}"
