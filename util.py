@@ -935,7 +935,7 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
     fig = px.imshow(
         new_img,
         origin='lower',            # same as matplotlib's origin='lower'
-        color_continuous_scale='RdBu',
+        color_continuous_scale='RdBu_r',
         zmin=vmin,
         zmax=vmax,
         labels={'color': unit},    # colorbar label
