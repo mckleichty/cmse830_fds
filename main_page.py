@@ -602,7 +602,19 @@ with tab4:
             chi2_maps[line_idx][mask] = chi2_red[i][line_idx]
 
 
-    j = 1 #which emission line to look at
+    #j = 1 #which emission line to look at
+
+    #round the peak wavelengths for display
+    peak_labels = [fr"H$_2$(S2) at {peak_wavelengths[0]:.3f} μm", f"[NeII] at {peak_wavelengths[1]:.3f} μm", f"[NeIII] at {peak_wavelengths[2]:.3f} μm"]
+    
+    #let user choose one of the three peak wavelengths
+    selected_label = st.radio("Choose emission line:", peak_labels, key = 'iwejfirejgf')
+    
+    #get the actual wavelength value from the label
+    j = peak_labels.index(selected_label)
+    #j = peak_wavelengths[selected_index]
+
+    
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
     second_component_label = (chi2_maps[j] > chi2_threshold).astype(int)
@@ -665,7 +677,7 @@ with tab4:
         #color_continuous_scale='RdBu_r',
         origin='lower',
         labels={'color': 'Second Component'},
-        title="Linear Regression model-predicted Pixels Needing Second Component"
+        title="Logistic Regression model-predicted Pixels Needing Second Component"
     )
     st.plotly_chart(figs, use_container_width=True)
 
