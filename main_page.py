@@ -646,30 +646,37 @@ with tab4:
     mask_valid = ~np.isnan(X_raw).any(axis=1)
     X = X_raw[mask_valid]
     y = y_raw[mask_valid]
+
+    try:
+        # Split into train/test
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        clf = LogisticRegression()
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        
+        # F1 score
+        f1 = f1_score(y_test, y_pred)
+        #st.write(f"F1 score: {f1:.2f}")
+        
+        # Optional: detailed classification report
+        #report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
+        #st.write(report)
+        # Generate classification report as a dict
+        report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
+        
+        # Convert to DataFrame
+        report_df = pd.DataFrame(report_dict).transpose()
+        
+        # Display nicely in Streamlit
+        st.subheader("Logistic Regression Summary")
+        st.dataframe(report_df)
     
-    # Split into train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    clf = LogisticRegression()
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    
-    # F1 score
-    f1 = f1_score(y_test, y_pred)
-    #st.write(f"F1 score: {f1:.2f}")
-    
-    # Optional: detailed classification report
-    #report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
-    #st.write(report)
-    # Generate classification report as a dict
-    report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
-    
-    # Convert to DataFrame
-    report_df = pd.DataFrame(report_dict).transpose()
-    
-    # Display nicely in Streamlit
-    st.subheader("Logistic Regression Summary")
-    st.dataframe(report_df)
+    except ValueError as e:
+    st.warning(
+        f"⚠️ Machine learning model could not be trained for this emission line. "
+        f"The data contains only one class. \n\nError: `{e}`"
+    )
 
     # Initialize map with NaNs
     second_component_pred = np.full(chi2_maps[j].shape, np.nan)
