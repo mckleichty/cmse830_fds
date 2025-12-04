@@ -612,7 +612,7 @@ with tab4:
     titles2 = ["H2(S2)", "[NeII]", "[NeIII]"]
     #title = f"{titles2[j]}"
     
-    col1, col2 = st.columns([1, 1])
+    col1, col2 = st.columns([1, 1.5])
     with col1:
         #_, _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
         _, _, _, _, _ = util.gaussian_fitter(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], titles2[j], truncate_side = None, truncate_percent = 0.0, plot = True)
