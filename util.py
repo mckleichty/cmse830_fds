@@ -611,7 +611,7 @@ def impute_with_neighbors(data, quality, required_quality=1, min_neighbors=3):
 
     return imputed_data
 
-def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, title,
+def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err, title,
                     truncate_side=None, truncate_percent=0.0,
                     plot=False, second_comp_map=False):
 
