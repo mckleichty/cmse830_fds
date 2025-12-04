@@ -630,8 +630,17 @@ with tab4:
     accuracy = clf.score(X_test, y_test)
     st.write(f"ML model accuracy: {accuracy:.2f}")
 
-    # Predict for all pixels
-    second_component_pred = clf.predict(X).reshape(chi2_maps[j].shape)
+    # Initialize map with NaNs
+    second_component_pred = np.full(chi2_maps[j].shape, np.nan)
+    
+    # Flatten the map to 1D
+    flat_pred = np.full(X_raw.shape[0], np.nan)
+    
+    # Assign predictions to valid indices
+    flat_pred[mask_valid] = clf.predict(X)
+    
+    # Reshape back to 2D
+    second_component_pred = flat_pred.reshape(chi2_maps[j].shape)
     
     figs = px.imshow(
         second_component_pred,
