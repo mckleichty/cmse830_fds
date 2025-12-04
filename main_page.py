@@ -50,7 +50,7 @@ with tab1:
 
     #st.subheader("You must download the data set from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link) and upload it yourself!")
 
-    st.warning(
+    st.info(
         "You must download the dataset from "
         "[this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link) "
         "and upload it yourself!"
