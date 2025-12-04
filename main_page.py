@@ -83,7 +83,7 @@ with tab1:
 
 # --- TAB 2: my IDA ---
 with tab2:
-    st.subheader("IFU Information")
+    st.header("IFU Information")
     st.markdown("Below includes some general information about the type and shape of our IFU dataset.")
     
     #load primary FITS file
