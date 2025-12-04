@@ -612,7 +612,7 @@ with tab4:
     ], axis=1)
     chi2_threshold = 3.0
     #y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
-    y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.02)).astype(int)
+    y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.01)).astype(int)
 
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import train_test_split
