@@ -19,6 +19,7 @@ from plotly.subplots import make_subplots
 from scipy.ndimage import generic_filter
 from vorbin.voronoi_2d_binning import voronoi_2d_binning
 import plotly.express as px
+import random
 
 def open_file(data_file):
     #this function is just to get the science cube information
@@ -564,7 +565,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
 
     
         #fig.update_layout(height=600, showlegend=True)
-        st.plotly_chart(fig, use_container_width=True, key = 'eorihfoerihgoesrg')
+        st.plotly_chart(fig, use_container_width=True, key=f"plot_{random.randint(0, 1_000_000)}")
 
     return popt, stddev_fit, stddev_uncertainty, popt_errs, chi2_red
 
