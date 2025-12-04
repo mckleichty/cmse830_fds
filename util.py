@@ -807,7 +807,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
 
         fig.add_annotation(
             x=xfit[0],                  # leftmost x in the O–C plot
-            y=max(residuals) * 0.9,     # your original vertical placement
+            y=max(residuals) * 1.1,     # your original vertical placement
             text=f"Reduced χ² = {chi2_red:.2f}",
             showarrow=False,
             font=dict(color='black', size=12),
