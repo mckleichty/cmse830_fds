@@ -590,7 +590,7 @@ with tab4:
     bin_fluxes = st.session_state.bin_fluxes
     bin_errors = st.session_state.bin_errors
     bin_map = st.session_state.bin_map
-    linewdith_maps = st.session_state.lw_maps
+    linewidth_maps = st.session_state.lw_maps
 
     n_lines = len(chi2_red[0])  # e.g., 3 emission lines
     chi2_maps = [np.full(image_shape, np.nan) for _ in range(n_lines)]
@@ -608,10 +608,11 @@ with tab4:
     # Flatten and stack features: shape = (num_pixels, 2)
     X_raw = np.stack([
         chi2_maps[j].flatten(),   # reduced chi²
-        linewdith_maps[j].flatten()      # line width
+        linewidth_maps[j].flatten()      # line width
     ], axis=1)
-    chi2_threshold = 3.0
-    y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
+    #chi2_threshold = 3.0
+    #y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
+    y_raw = ((chi2_maps[j] > 3) & (linewidth_maps[j] > 0.02)).astype(int)
 
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import train_test_split
@@ -622,7 +623,7 @@ with tab4:
     y = y_raw[mask_valid]
     
     # Split into train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.02, random_state=42)
     
     clf = LogisticRegression()
     clf.fit(X_train, y_train)
@@ -654,7 +655,7 @@ with tab4:
 
     #second model; random forest
     # Use RandomForestClassifier instead of LogisticRegression
-    clf = RandomForestClassifier(n_estimators=200, random_state=42)
+    clf = RandomForestClassifier(n_estimators=200, random_state=54)
     clf.fit(X_train, y_train)
 
     # Optional evaluation
@@ -670,7 +671,7 @@ with tab4:
     figsss = px.imshow(
         second_component_pred,
         origin='lower',
-        color_continuous_scale='RdBu_r',
+        #color_continuous_scale='RdBu_r',
         labels={'color': 'Second Component'},
         title="ML-predicted Pixels Needing Second Component"
     )
