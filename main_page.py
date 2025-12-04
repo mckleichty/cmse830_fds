@@ -677,8 +677,8 @@ with tab4:
         _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
                         titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
-    
-    
+#with tab5:
+    #redshift
 
 
 
