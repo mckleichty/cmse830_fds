@@ -730,7 +730,8 @@ with tab4:
     #st.plotly_chart(figss, use_container_width=True)
 
     st.markdown("""Based on which pixels are predicted to need a second component fit, Vulcan fits two Gaussian models. We expect to
-    see a $\\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below.
+    see a $\\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below. $\textbf{H2S2 is not working right now
+    because it doesn't need any second components fit...}$
     """)
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
@@ -750,7 +751,7 @@ with tab4:
 
 with tab5:
     st.header("Gas Kinematics Analysis")
-    st.markdown("""this is where the magic happens.
+    st.markdown("""this is where the magic happens. will be adding more documentation, just haven't had time.
     """)
 
     # Check if inputs are provided
