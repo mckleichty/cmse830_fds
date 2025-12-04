@@ -575,6 +575,7 @@ with tab4:
     machine learning model to predict which pixels will need a second component fit based on the previous $\\tilde{\chi}^2$ values 
     and the linewidths. You can select below which emission line to focus on.
     """)
+    st.subheader("H2S2 is not working right now because it doesn't need any second components fit...")
 
     # Load cached processed Gaussian results from Tab 3
     gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
@@ -730,8 +731,7 @@ with tab4:
     #st.plotly_chart(figss, use_container_width=True)
 
     st.markdown("""Based on which pixels are predicted to need a second component fit, Vulcan fits two Gaussian models. We expect to
-    see a $\\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below. $\textbf{H2S2 is not working right now
-    because it doesn't need any second components fit...}$
+    see a $\\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below.
     """)
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
