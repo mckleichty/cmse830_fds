@@ -521,7 +521,7 @@ def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, tit
         # Add annotation to the upper left corner of the O-C subplot
         fig.add_annotation(
             x=wavelengths_fit[0],                  # leftmost x
-            y=max(residuals) * 0.9,                # near top of residuals
+            y=max(residuals) * 1.5,                # near top of residuals
             text=f"Reduced χ² = {chi2_red:.2f}",
             showarrow=False,
             font=dict(color='black', size=12),
@@ -810,7 +810,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
 
         fig.add_annotation(
             x=xfit[0],                  # leftmost x in the O–C plot
-            y=max(residuals) * 2,     # your original vertical placement
+            y=max(residuals) * 1.5,     # your original vertical placement
             text=f"Reduced χ² = {chi2_red:.2f}",
             showarrow=False,
             font=dict(color='black', size=12),
