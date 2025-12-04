@@ -924,14 +924,26 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
         new_img_err[mask] = avg_errs[i]
 
     # Plotting
-    fig, axs = plt.subplots(1, 1, figsize=(8, 6), subplot_kw={'projection': img.wcs})
+    #fig, axs = plt.subplots(1, 1, figsize=(8, 6))
 
-    im = axs.imshow(new_img, origin='lower', cmap='bwr', norm=norm, vmin=vmin, vmax=vmax)
-    cbar = fig.colorbar(im, ax=axs)
-    cbar.set_label(f'{unit}')
-    axs.set_title(title)
+    #im = axs.imshow(new_img, origin='lower', cmap='bwr', norm=norm, vmin=vmin, vmax=vmax)
+    #cbar = fig.colorbar(im, ax=axs)
+    #cbar.set_label(f'{unit}')
+    #axs.set_title(title)
 
-    plt.show()
+    #plt.show()
+    fig = px.imshow(
+        new_img,
+        origin='lower',            # same as matplotlib's origin='lower'
+        color_continuous_scale='bwr',
+        zmin=vmin,
+        zmax=vmax,
+        labels={'color': unit},    # colorbar label
+        title=title
+    )
+    
+    # Display in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
 
     # return the median error
     print('Median Error:', np.median(avg_errs), unit)
