@@ -610,9 +610,9 @@ with tab4:
     j = 0 #h2s2 emission line
     peak_wavelength = peak_wavelengths[j]
     title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
-    _, _, _, _, _, _ = util.gaussian_fitter_test(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
-                    title, second_component_mask=chi2_maps[j], truncate_side=None, 
-                    truncate_percent=0.0, plot=True)
+    _, _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
+                    title, truncate_side=None, truncate_percent=0.0, plot=True, second_component_mask=chi2_maps[j])
+
     
 """
 with tab4:
