@@ -569,7 +569,7 @@ with tab4:
     This means that a simple Gaussian model won't work. Instead, we can add a second Gaussian to model the second component of the gas.
     There can be different gas clouds moving in different directions with the same element in them. Vulcan uses a linear regression
     machine learning model to predict which pixels will need a second component fit based on the previous $\\tilde{\chi}^2$ values 
-    and the linewdiths. You can select below which emission line to focus on.
+    and the linewidths. You can select below which emission line to focus on.
     """)
 
     # Load cached processed Gaussian results from Tab 3
