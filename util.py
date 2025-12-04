@@ -730,7 +730,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                             row_heights=[0.7, 0.5],
                             vertical_spacing=0.2,
-                            subplot_titles=[f"Fit of the {title} line", "O-C Residuals"])
+                            subplot_titles=[f"{title}", "O-C Residuals"])
 
         # Make subplot titles black
         fig.update_annotations(font=dict(color='black'))
