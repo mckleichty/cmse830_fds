@@ -675,7 +675,7 @@ with tab4:
     except ValueError as e:
         st.warning(
             f"⚠️ Machine learning model could not be trained for this emission line. "
-            f"The data contains only one class. \n\nError: `{e}`"
+            f"The data does not need any second components fit."
         )
 
     # Initialize map with NaNs
@@ -699,29 +699,39 @@ with tab4:
     )
     st.plotly_chart(figs, use_container_width=True)
 
-    #second model; random forest
-    # Use RandomForestClassifier instead of LogisticRegression
-    #clf = RandomForestClassifier(n_estimators=200, random_state=54)
-    #clf.fit(X_train, y_train)
-    from sklearn.ensemble import HistGradientBoostingClassifier
+    try:
+        # Split into train/test
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        #second model; random forest
+        # Use RandomForestClassifier instead of LogisticRegression
+        #clf = RandomForestClassifier(n_estimators=200, random_state=54)
+        #clf.fit(X_train, y_train)
+        from sklearn.ensemble import HistGradientBoostingClassifier
+    
+        clf = HistGradientBoostingClassifier(max_iter=100, random_state=42)
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+    
+        # F1 score
+        f1 = f1_score(y_test, y_pred)
+        #st.write(f"F1 score: {f1:.2f}")
+        
+        # Generate classification report as a dict
+        report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
+        
+        # Convert to DataFrame
+        report_df = pd.DataFrame(report_dict).transpose()
+        
+        # Display nicely in Streamlit
+        st.subheader("HGBC Summary")
+        st.dataframe(report_df)
 
-    clf = HistGradientBoostingClassifier(max_iter=100, random_state=42)
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-
-    # F1 score
-    f1 = f1_score(y_test, y_pred)
-    #st.write(f"F1 score: {f1:.2f}")
-    
-    # Generate classification report as a dict
-    report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
-    
-    # Convert to DataFrame
-    report_df = pd.DataFrame(report_dict).transpose()
-    
-    # Display nicely in Streamlit
-    st.subheader("HGBC Summary")
-    st.dataframe(report_df)
+    except ValueError as e:
+        st.warning(
+            f"⚠️ Machine learning model could not be trained for this emission line. "
+            f"The data does not need any second components fit."
+        )
 
     # Predict all pixels
     flat_pred = np.full(X_raw.shape[0], np.nan)
