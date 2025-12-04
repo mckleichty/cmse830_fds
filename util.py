@@ -611,47 +611,215 @@ def impute_with_neighbors(data, quality, required_quality=1, min_neighbors=3):
 
     return imputed_data
 
+def gaussian_fitter(peak_wavelength, fit_width, wavelengths, flux, flux_err, title,
+                    truncate_side=None, truncate_percent=0.0,
+                    plot=False, second_comp_map=False):
+
+    # -------------------------
+    # ---  MODEL DEFINITIONS ---
+    # -------------------------
+    def one_gauss(x, amp, mean, std, slope, intercept):
+        g = amp * np.exp(-((x - mean)**2) / (2*std**2))
+        return g + slope*x + intercept
+
+    def two_gauss(x, a1, m1, s1, a2, m2, s2, slope, intercept):
+        g1 = a1 * np.exp(-((x - m1)**2) / (2*s1**2))
+        g2 = a2 * np.exp(-((x - m2)**2) / (2*s2**2))
+        return g1 + g2 + slope*x + intercept
+
+
+    # -------------------------
+    # --- FITTING RANGE ---
+    # -------------------------
+    mask = (wavelengths > peak_wavelength - fit_width) & \
+           (wavelengths < peak_wavelength + fit_width)
+    xfit, yfit, efit = wavelengths[mask], flux[mask], flux_err[mask]
+
+    est_std = truncate_percent * fit_width
+
+    # Optional truncation
+    if truncate_side == 'left':
+        m2 = xfit > (peak_wavelength - est_std)
+        xfit, yfit, efit = xfit[m2], yfit[m2], efit[m2]
+    elif truncate_side == 'right':
+        m2 = xfit < (peak_wavelength + est_std)
+        xfit, yfit, efit = xfit[m2], yfit[m2], efit[m2]
+
+
+    # -------------------------
+    # --- INITIAL GUESSES ---
+    # -------------------------
+    base_guess = np.min(yfit)
+    amp_guess = np.max(yfit) - base_guess
+
+    if second_comp_map:
+        initial_guess = [
+            amp_guess * 0.6, peak_wavelength - 0.003, 0.01,  # comp1
+            amp_guess * 0.4, peak_wavelength + 0.003, 0.01,  # comp2
+            0.0, base_guess                                  # baseline
+        ]
+
+        bounds_low = [0, peak_wavelength - fit_width, 1e-5,
+                      0, peak_wavelength - fit_width, 1e-5,
+                      -np.inf, -np.inf]
+
+        bounds_high = [np.inf, peak_wavelength + fit_width, np.inf,
+                       np.inf, peak_wavelength + fit_width, np.inf,
+                       np.inf, np.inf]
+
+        model = two_gauss
+        n_params = 8
+
+    else:
+        initial_guess = [amp_guess, peak_wavelength, 0.01, 0.0, base_guess]
+
+        bounds_low = [0, peak_wavelength - fit_width, 1e-5, -np.inf, -np.inf]
+        bounds_high = [np.inf, peak_wavelength + fit_width, np.inf, np.inf, np.inf]
+
+        model = one_gauss
+        n_params = 5
+
+
+    # -------------------------
+    # --- FIT ---
+    # -------------------------
+    try:
+        popt, pcov = curve_fit(
+            model, xfit, yfit, sigma=efit, p0=initial_guess,
+            bounds=(bounds_low, bounds_high), maxfev=8000
+        )
+        perr = np.sqrt(np.diag(pcov))
+    except (RuntimeError, ValueError):
+        return [np.nan]*n_params, np.nan, np.nan, np.array([np.nan]*n_params), np.nan
+
+
+    # for compatibility return std of comp 1 (or only comp)
+    stddev_fit = popt[2]
+    stddev_unc = perr[2]
+
+
+    # -------------------------
+    # --- MODEL + UNC ---
+    # -------------------------
+    fit_vals = model(xfit, *popt)
+
+    # numerical jacobian
+    J = np.zeros((len(xfit), n_params))
+    eps = 1e-6
+    for j in range(n_params):
+        step = np.zeros(n_params)
+        step[j] = eps
+        fp = model(xfit, *(popt + step))
+        fm = model(xfit, *(popt - step))
+        J[:, j] = (fp - fm) / (2*eps)
+
+    fit_unc = np.sqrt(np.sum(J @ pcov * J, axis=1))
+
+
+    # -------------------------
+    # --- CHI2 ---
+    # -------------------------
+    residuals = yfit - fit_vals
+    chi2 = np.sum((residuals / efit)**2)
+    dof = len(yfit) - n_params
+    chi2_red = chi2 / dof
+
+
+    # -------------------------
+    # --- PLOTTING ---
+    # -------------------------
+    if plot:
+
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                            row_heights=[0.7, 0.3],
+                            vertical_spacing=0.18,
+                            subplot_titles=[f"Fit of {title}", "Residuals"])
+
+        # full spectrum
+        fig.add_trace(go.Scatter(
+            x=wavelengths, y=flux, mode='lines',
+            line=dict(color='gray'),
+            name='Full Spectrum'
+        ))
+
+        # data used for fit
+        fig.add_trace(go.Scatter(
+            x=xfit, y=yfit, mode='markers',
+            marker=dict(size=5, color='black'),
+            name='Fit Data'
+        ))
+
+        # fit uncertainty band
+        fig.add_trace(go.Scatter(
+            x=np.concatenate([xfit, xfit[::-1]]),
+            y=np.concatenate([fit_vals + fit_unc, (fit_vals - fit_unc)[::-1]]),
+            fill='toself', fillcolor='rgba(255,0,0,0.25)',
+            line=dict(width=0),
+            name='Fit ±1σ'
+        ))
+
+        # total model
+        fig.add_trace(go.Scatter(
+            x=xfit, y=fit_vals, mode='lines',
+            line=dict(color='red'),
+            name='Total Model'
+        ))
+
+        # ---------------------------------------
+        # --- NEW: PLOT INDIVIDUAL GAUSSIANS ---
+        # ---------------------------------------
+        if second_comp_map:
+
+            # unpack
+            a1,m1,s1, a2,m2,s2, slope, intercept = popt
+
+            g1 = a1 * np.exp(-((xfit - m1)**2) / (2*s1**2))
+            g2 = a2 * np.exp(-((xfit - m2)**2) / (2*s2**2))
+            baseline = slope * xfit + intercept
+
+            # Gaussian 1
+            fig.add_trace(go.Scatter(
+                x=xfit, y=g1 + baseline,
+                mode='lines',
+                line=dict(color='orange', dash='dash'),
+                name='Gaussian 1'
+            ))
+
+            # Gaussian 2
+            fig.add_trace(go.Scatter(
+                x=xfit, y=g2 + baseline,
+                mode='lines',
+                line=dict(color='purple', dash='dash'),
+                name='Gaussian 2'
+            ))
+
+        # ---------------------------------------
+
+        # residuals
+        fig.add_trace(go.Scatter(
+            x=xfit, y=residuals, mode='lines',
+            line=dict(color='blue'),
+            showlegend=False
+        ), row=2, col=1)
+
+        fig.add_trace(go.Scatter(
+            x=xfit, y=np.zeros_like(xfit),
+            mode='lines', line=dict(color='red'),
+            showlegend=False
+        ), row=2, col=1)
+
+        fig.update_layout(height=650)
+        st.plotly_chart(fig, use_container_width=True)
+
+    return popt, stddev_fit, stddev_unc, perr, chi2_red
+
+"""
 def gaussian_fitter_test(peak_wavelength, fit_width, wavelengths, flux, flux_err, 
                     title, second_component_mask=None, truncate_side=None, 
                     truncate_percent=0.0, plot=False):
-    """
-    Fits a Gaussian on top of a linear baseline, with optional second Gaussian
-    component in regions indicated by second_component_mask.
     
-    Parameters
-    ----------
-    peak_wavelength : float
-        Wavelength to center the first Gaussian.
-    fit_width : float
-        Range around peak_wavelength to fit.
-    wavelengths : np.array
-        Wavelength array.
-    flux : np.array
-        Flux array.
-    flux_err : np.array
-        Flux uncertainties.
-    title : str
-        Title for plot.
-    second_component_mask : np.array or None
-        Boolean array where 1 indicates a second Gaussian should be fitted.
-    truncate_side : str or None
-        'left', 'right', or None for truncation.
-    truncate_percent : float
-        Fraction of fit width to truncate.
-    plot : bool
-        Whether to plot the fit.
-        
-    Returns
-    -------
-    popt : array
-        Best-fit parameters (amp1, mean1, std1, [amp2, mean2, std2], slope, intercept)
-    stddev_fit : float
-        Linewidth of first Gaussian.
-    stddev_uncertainty : float
-        Uncertainty of first Gaussian's linewidth.
-    popt_errs : array
-        Errors on fit parameters.
-    """
+    #Fits a Gaussian on top of a linear baseline, with optional second Gaussian
+    #component in regions indicated by second_component_mask.
     
     # --- Define fit region ---
     fit_mask = (wavelengths > (peak_wavelength - fit_width)) & \
@@ -750,5 +918,4 @@ def gaussian_fitter_test(peak_wavelength, fit_width, wavelengths, flux, flux_err
         st.plotly_chart(fig, use_container_width=True)
 
     return popt, stddev_fit, stddev_uncertainty, popt_errs
-
-                        
+"""                     
