@@ -609,7 +609,8 @@ with tab4:
     y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
     i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
     peak_wavelength = peak_wavelengths[j]
-    title = f"2 Gaussian Fit for {round(peak_wavelength,3)} μm line"
+    titles2 = ["H2(S2)", "[NeII]", "[NeIII]"]
+    title = f"{titles2[j]}"
     _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
                     title, truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
