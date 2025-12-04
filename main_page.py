@@ -26,6 +26,7 @@ st.set_page_config(page_title="Vulcan", layout="wide")
 
 #get sidebar values
 uploaded_file, z_input = sidebar_inputs()
+st.session_state.z = z_input
 
 #define tabs
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Getting Started", "IDA", "EDA and Imputation", "Feature Engineering/ML", "Gas Kinematics"])
@@ -694,6 +695,7 @@ with tab5:
     #valid_bin_fluxes = fit_results["valid_bin_fluxes"]
     valid_bin_masks = fit_results["valid_bin_masks"]
     #chi2_red = fit_results["chi2_red"]
+    z = st.session_state.z
     
     peak_wavelengths = st.session_state.peak_wavelengths
     #bin_fluxes = st.session_state.bin_fluxes
