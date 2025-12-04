@@ -11,6 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.metrics import f1_score, classification_report
+import pandas as pd
 
 #importing files I wrote
 import util as util #useful functions that would otherwise clutter this file up
