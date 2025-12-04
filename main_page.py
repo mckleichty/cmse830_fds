@@ -663,9 +663,9 @@ with tab4:
     # Use RandomForestClassifier instead of LogisticRegression
     #clf = RandomForestClassifier(n_estimators=200, random_state=54)
     #clf.fit(X_train, y_train)
-    from sklearn.svm import SVC
+    from sklearn.ensemble import HistGradientBoostingClassifier
 
-    clf = SVC(kernel='rbf', class_weight='balanced', probability=True, random_state=42)
+    clf = HistGradientBoostingClassifier(max_iter=100, random_state=42)
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
 
