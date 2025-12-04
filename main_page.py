@@ -450,6 +450,10 @@ with tab3:
         for line_idx in range(lw_array.shape[1]):
             linewidth_maps[line_idx][mask] = lw_array[i][line_idx]
             lw_err_maps[line_idx][mask] = lw_err_array[i][line_idx]
+
+    #store it
+    st.session_state.lw_maps = linewidth_maps
+    #linewdith_maps = st.session_state.lw_maps #call it
     
     peak_labels = [f"{round(w, 3)} μm" for w in peak_wavelengths]
     
@@ -579,6 +583,7 @@ with tab4:
     bin_fluxes = st.session_state.bin_fluxes
     bin_errors = st.session_state.bin_errors
     bin_map = st.session_state.bin_map
+    linewdith_maps = st.session_state.lw_maps
 
     n_lines = len(chi2_red[0])  # e.g., 3 emission lines
     chi2_maps = [np.full(image_shape, np.nan) for _ in range(n_lines)]
@@ -602,7 +607,7 @@ with tab4:
     # Flatten and stack features: shape = (num_pixels, 2)
     X = np.stack([
         chi2_maps[j].flatten(),   # reduced chi²
-        lw_maps[j].flatten()      # line width
+        linewdith_maps[j].flatten()      # line width
     ], axis=1)
     chi2_threshold = 3.0
     y = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
