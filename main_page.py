@@ -594,7 +594,7 @@ with tab4:
 
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
-    second_component_label = (chi2_maps[0] > chi2_threshold).astype(int)
+    second_component_label = (chi2_maps[0] > chi2_threshold).astype(int) #for h2s2
 
     fig = px.imshow(second_component_label, 
                 color_continuous_scale='RdBu_r', 
@@ -612,7 +612,7 @@ with tab4:
     peak_wavelength = peak_wavelengths[j]
     title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
     _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
-                    title, truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map=chi2_maps[j])
+                    title, truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map=second_component_label)
 
     
 """
