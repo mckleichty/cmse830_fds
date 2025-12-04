@@ -564,10 +564,10 @@ def reduced_chi_squared(flux, flux_err, fit_vals, num_params):
 # --- TAB 4: Machine Learning second-component analysis ---
 with tab4:
     st.header("ML-Based Second Component Prediction")
-    st.markdown("""During the EDA section of this analysis, we saw that for some pixels, there were high $\tilde{\chi}^2$ values.
+    st.markdown("""During the EDA section of this analysis, we saw that for some pixels, there were high $\\tilde{\chi}^2$ values.
     This means that a simple Gaussian model won't work. Instead, we can add a second Gaussian to model the second component of the gas.
     There can be different gas clouds moving in different directions with the same element in them. Vulcan uses a linear regression
-    machine learning model to predict which pixels will need a second component fit based on the previous $\tilde{\chi}^2$ values 
+    machine learning model to predict which pixels will need a second component fit based on the previous $\\tilde{\chi}^2$ values 
     and the linewdiths. You can select below which emission line to focus on.
     """)
 
@@ -659,7 +659,7 @@ with tab4:
     #st.plotly_chart(figss, use_container_width=True)
 
     st.markdown("""Based on which pixels are predicted to need a second component fit, Vulcan fits two Gaussian models. We expect to
-    see a $\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below.
+    see a $\\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below.
     """)
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
