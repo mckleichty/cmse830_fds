@@ -48,7 +48,14 @@ with tab1:
     - Make moment maps of emission features (coming soon)
     """)
 
-    st.subheader("You must download the data set from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link) and upload it yourself!")
+    #st.subheader("You must download the data set from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link) and upload it yourself!")
+
+    st.warning(
+        "You must download the dataset from "
+        "[this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link) "
+        "and upload it yourself!"
+    )
+    
     #information about this dataset
     st.header("Exploring Abell 2597")
     
