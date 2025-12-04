@@ -626,7 +626,7 @@ with tab4:
     ], axis=1)
     chi2_threshold = 3
     #y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
-    y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.01)).astype(int)
+    y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.015)).astype(int)
 
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import train_test_split
@@ -637,7 +637,7 @@ with tab4:
     y = y_raw[mask_valid]
     
     # Split into train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     clf = LogisticRegression()
     clf.fit(X_train, y_train)
