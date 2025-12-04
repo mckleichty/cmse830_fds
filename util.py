@@ -850,6 +850,6 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
             ),
             height=600
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key = 'help')
 
     return popt, stddev_fit, stddev_unc, perr, chi2_red
