@@ -597,12 +597,50 @@ with tab4:
     # chi2_map is 2D array of reduced chi^2 for each pixel
     second_component_label = (chi2_maps[j] > chi2_threshold).astype(int)
 
-    fig = px.imshow(second_component_label, 
+
+    #testingeirighiwreihgihhitrgeihrtg
+    # Flatten and stack features: shape = (num_pixels, 2)
+    X = np.stack([
+        chi2_maps[j].flatten(),   # reduced chi²
+        lw_maps[j].flatten()      # line width
+    ], axis=1)
+    chi2_threshold = 3.0
+    y = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
+
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import train_test_split
+    
+    # Split into train/test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    clf = LogisticRegression()
+    clf.fit(X_train, y_train)
+    
+    # Optional evaluation
+    accuracy = clf.score(X_test, y_test)
+    st.write(f"ML model accuracy: {accuracy:.2f}")
+
+    # Predict for all pixels
+    second_component_pred = clf.predict(X).reshape(chi2_maps[j].shape)
+    
+    figs = px.imshow(
+        second_component_pred,
+        color_continuous_scale='RdBu_r',
+        origin='lower',
+        labels={'color': 'Second Component'},
+        title="ML-predicted pixels needing second component"
+    )
+    st.plotly_chart(figs, use_container_width=True)
+
+
+    # end of testingnitringnnirtg
+
+    figss = px.imshow(second_component_label, 
                 color_continuous_scale='RdBu_r', 
                 origin='lower',
                 labels={'color':'Second Component'},
                 title="Pixels needing second component (1 = yes, 0 = no)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(figss, use_container_width=True)
 
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
