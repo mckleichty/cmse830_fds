@@ -683,57 +683,64 @@ with tab5:
     st.markdown("""need to add warning that says must input a redshift to do this part.
     """)
 
-    gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
-    fit_results = st.session_state[gauss_key]
-
-    #lw = fit_results["lw"]
-    #lw_err = fit_results["lw_err"]
-    mean_fits = fit_results["mean_fits"]
-    mean_fits_errs = fit_results["mean_fits_errs"]
-    #amp = fit_results["amp"]
-    #amp_err = fit_results["amp_err"]
-    #valid_bin_fluxes = fit_results["valid_bin_fluxes"]
-    valid_bin_masks = fit_results["valid_bin_masks"]
-    #chi2_red = fit_results["chi2_red"]
+    # Check if inputs are provided
     z = st.session_state.z
+    if z == 0: #if they haven't inputted a redshift
+        st.warning("Please enter in the correct redshift to produce velocity maps.")
+    else:
+        # Run your calculation
+        st.write(f"Running calculation")
+
+        gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
+        fit_results = st.session_state[gauss_key]
     
-    peak_wavelengths = st.session_state.peak_wavelengths
-    #bin_fluxes = st.session_state.bin_fluxes
-    #bin_errors = st.session_state.bin_errors
-    #bin_map = st.session_state.bin_map
-    #linewdith_maps = st.session_state.lw_maps
-    data_cube = st.session_state.data_cube
+        #lw = fit_results["lw"]
+        #lw_err = fit_results["lw_err"]
+        mean_fits = fit_results["mean_fits"]
+        mean_fits_errs = fit_results["mean_fits_errs"]
+        #amp = fit_results["amp"]
+        #amp_err = fit_results["amp_err"]
+        #valid_bin_fluxes = fit_results["valid_bin_fluxes"]
+        valid_bin_masks = fit_results["valid_bin_masks"]
+        #chi2_red = fit_results["chi2_red"]
+        
+        peak_wavelengths = st.session_state.peak_wavelengths
+        #bin_fluxes = st.session_state.bin_fluxes
+        #bin_errors = st.session_state.bin_errors
+        #bin_map = st.session_state.bin_map
+        #linewdith_maps = st.session_state.lw_maps
+        data_cube = st.session_state.data_cube
+        
+        
+        h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err = util.calc_redshift(mean_fits, mean_fits_errs)
+    
+        # z_bar will be our average redshift from all three emission lines
+        c = 3e5 #km/s
+        #z_bar = (np.sum(h2s2_z)+np.sum(ne2_z)+np.sum(ne3_z)) / (len(h2s2_z)+len(ne2_z)+len(ne3_z))
+        z_bar = np.full(len(ne2_z), z) #assuming we use redshift given in table (0.0633)
+        velocity_h2s2 = c*(h2s2_z - z_bar) #velocity of h2s2 in km/s
+        velocity_ne2 = c*(ne2_z - z_bar) #velocity of ne2
+        velocity_ne3 = c*(ne3_z - z_bar) #velocity of ne3
+    
+        #call isolate_wavelength using the selected wavelength
+        cont_img, _, _ = util.isolate_wavelength(data_cube, [peak_wavelengths[0] - 0.01], [peak_wavelengths[0] + 0.01], local=0.1)
+    
+        #plotting velocities
+        velocity_h2s2_err = c * np.array(h2s2_z_err) #velocity of h2s2 in km/s
+        _, _, _, _ = util.map_vals(velocity_h2s2, velocity_h2s2_err, valid_bin_masks, cont_img, 'Velocity of H2(S2)', 'km/s', use_error = False)#, vmin = -400, vmax = 400)
+        
+        velocity_ne2_err = c * np.array(ne2_z_err) #velocity of ne2 in km/s
+        #vmin, vmax, ve_ne2_img, velocity_ne2_err_img = util.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks, cont_img, 'Velocity of [Neii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
+        
+        velocity_ne3_err = c * np.array(ne3_z_err) #velocity of ne3 in km/s
+        #_, _, ve_ne3_img, _ = util.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks, cont_img, 'Velocity of [Neiii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
     
     
-    h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err = util.calc_redshift(mean_fits, mean_fits_errs)
-
-    # z_bar will be our average redshift from all three emission lines
-    c = 3e5 #km/s
-    #z_bar = (np.sum(h2s2_z)+np.sum(ne2_z)+np.sum(ne3_z)) / (len(h2s2_z)+len(ne2_z)+len(ne3_z))
-    z_bar = np.full(len(ne2_z), z) #assuming we use redshift given in table (0.0633)
-    velocity_h2s2 = c*(h2s2_z - z_bar) #velocity of h2s2 in km/s
-    velocity_ne2 = c*(ne2_z - z_bar) #velocity of ne2
-    velocity_ne3 = c*(ne3_z - z_bar) #velocity of ne3
-
-    #call isolate_wavelength using the selected wavelength
-    cont_img, _, _ = util.isolate_wavelength(data_cube, [peak_wavelengths[0] - 0.01], [peak_wavelengths[0] + 0.01], local=0.1)
-
-    #plotting velocities
-    velocity_h2s2_err = c * np.array(h2s2_z_err) #velocity of h2s2 in km/s
-    _, _, _, _ = util.map_vals(velocity_h2s2, velocity_h2s2_err, valid_bin_masks, cont_img, 'Velocity of H2(S2)', 'km/s', use_error = False)#, vmin = -400, vmax = 400)
     
-    velocity_ne2_err = c * np.array(ne2_z_err) #velocity of ne2 in km/s
-    #vmin, vmax, ve_ne2_img, velocity_ne2_err_img = util.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks, cont_img, 'Velocity of [Neii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
     
-    velocity_ne3_err = c * np.array(ne3_z_err) #velocity of ne3 in km/s
-    #_, _, ve_ne3_img, _ = util.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks, cont_img, 'Velocity of [Neiii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
-
-
-
-
-
-
-
-
+    
+    
+    
+    
 
 
