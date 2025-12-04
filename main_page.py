@@ -610,9 +610,9 @@ with tab4:
         chi2_maps[j].flatten(),   # reduced chi²
         linewidth_maps[j].flatten()      # line width
     ], axis=1)
-    #chi2_threshold = 3.0
+    chi2_threshold = 3.0
     #y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
-    y_raw = ((chi2_maps[j] > 3) & (linewidth_maps[j] > 0.02)).astype(int)
+    y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.02)).astype(int)
 
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import train_test_split
