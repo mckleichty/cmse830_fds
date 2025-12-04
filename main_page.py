@@ -632,11 +632,11 @@ with tab4:
     
     # F1 score
     f1 = f1_score(y_test, y_pred)
-    st.write(f"F1 score: {f1:.2f}")
+    #st.write(f"F1 score: {f1:.2f}")
     
     # Optional: detailed classification report
     report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
-    st.text(report)
+    st.write(report)
 
     # Initialize map with NaNs
     second_component_pred = np.full(chi2_maps[j].shape, np.nan)
@@ -671,11 +671,11 @@ with tab4:
 
     # F1 score
     f1 = f1_score(y_test, y_pred)
-    st.write(f"F1 score: {f1:.2f}")
+    #st.write(f"F1 score: {f1:.2f}")
     
     # Optional: detailed classification report
     report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
-    st.text(report)
+    st.write(report)
 
     # Predict all pixels
     flat_pred = np.full(X_raw.shape[0], np.nan)
