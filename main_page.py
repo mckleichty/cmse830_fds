@@ -729,10 +729,10 @@ with tab5:
         _, _, _, _ = util.map_vals(velocity_h2s2, velocity_h2s2_err, valid_bin_masks, cont_img, 'Velocity of H2(S2)', 'km/s', use_error = False)#, vmin = -400, vmax = 400)
         
         velocity_ne2_err = c * np.array(ne2_z_err) #velocity of ne2 in km/s
-        vmin, vmax, ve_ne2_img, velocity_ne2_err_img = util.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks, cont_img, 'Velocity of [Neii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
+        vmin, vmax, ve_ne2_img, velocity_ne2_err_img = util.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks, cont_img, 'Velocity of [Neii]', 'km/s', use_error = False, vmin = -400, vmax = 400)
         
         velocity_ne3_err = c * np.array(ne3_z_err) #velocity of ne3 in km/s
-        _, _, ve_ne3_img, _ = util.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks, cont_img, 'Velocity of [Neiii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
+        _, _, ve_ne3_img, _ = util.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks, cont_img, 'Velocity of [Neiii]', 'km/s', use_error = False, vmin = -400, vmax = 400)
     
     
     
