@@ -678,7 +678,29 @@ with tab4:
                         titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
 with tab5:
+    st.header("Gas Kinematics Analysis")
+    st.markdown("""need to add warning that says must input a redshift to do this part.
+    """)
+    
     h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err = util.calc_redshift(mean_fits, mean_fits_errs)
+
+    # z_bar will be our average redshift from all three emission lines
+    c = 3e5 #km/s
+    #z_bar = (np.sum(h2s2_z)+np.sum(ne2_z)+np.sum(ne3_z)) / (len(h2s2_z)+len(ne2_z)+len(ne3_z))
+    z_bar = np.full(len(ne2_z), z) #assuming we use redshift given in table (0.0633)
+    velocity_h2s2 = c*(h2s2_z - z_bar) #velocity of h2s2 in km/s
+    velocity_ne2 = c*(ne2_z - z_bar) #velocity of ne2
+    velocity_ne3 = c*(ne3_z - z_bar) #velocity of ne3
+
+    #plotting velocities
+    velocity_h2s2_err = c * np.array(h2s2_z_err) #velocity of h2s2 in km/s
+    #_, _, _, _ = my_func.map_vals(velocity_h2s2, velocity_h2s2_err, valid_bin_masks2, cont_img, 'Velocity of H2(S2)', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
+    
+    velocity_ne2_err = c * np.array(ne2_z_err) #velocity of ne2 in km/s
+    #vmin, vmax, ve_ne2_img, velocity_ne2_err_img = my_func.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks2, cont_img, 'Velocity of [Neii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
+    
+    velocity_ne3_err = c * np.array(ne3_z_err) #velocity of ne3 in km/s
+    #_, _, ve_ne3_img, _ = my_func.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks2, cont_img, 'Velocity of [Neiii]', 'km/s', center, use_error = False, log_scale = False, vmin = -400, vmax = 400)
 
 
 
