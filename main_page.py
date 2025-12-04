@@ -628,6 +628,7 @@ with tab4:
     
     clf = LogisticRegression()
     clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
     
     # F1 score
     f1 = f1_score(y_test, y_pred)
@@ -662,6 +663,7 @@ with tab4:
     # Use RandomForestClassifier instead of LogisticRegression
     clf = RandomForestClassifier(n_estimators=200, random_state=54)
     clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
 
     # F1 score
     f1 = f1_score(y_test, y_pred)
