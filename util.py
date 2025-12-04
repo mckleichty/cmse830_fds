@@ -727,24 +727,23 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
     # --- PLOTTING ---
     # -------------------------
     if plot:
-
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                             row_heights=[0.7, 0.3],
-                            vertical_spacing=0.18,
-                            subplot_titles=[f"Fit of {title}", "Residuals"])
+                            vertical_spacing=0.2,
+                            subplot_titles=[f"Fit of the {title} line", "O-C Residuals"])
 
         # full spectrum
         fig.add_trace(go.Scatter(
             x=wavelengths, y=flux, mode='lines',
-            line=dict(color='gray'),
-            name='Full Spectrum'
+            line=dict(color='blue'),
+            name='Original Data'
         ))
 
         # data used for fit
         fig.add_trace(go.Scatter(
-            x=xfit, y=yfit, mode='markers',
-            marker=dict(size=5, color='black'),
-            name='Fit Data'
+            x=xfit, y=yfit, mode='lines',
+            marker=dict(color='green'),
+            name='Data for Fit'
         ))
 
         # fit uncertainty band
@@ -780,7 +779,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
                 x=xfit, y=g1 + baseline,
                 mode='lines',
                 line=dict(color='orange', dash='dash'),
-                name='Gaussian 1'
+                name='Main Component'
             ))
 
             # Gaussian 2
@@ -788,7 +787,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
                 x=xfit, y=g2 + baseline,
                 mode='lines',
                 line=dict(color='purple', dash='dash'),
-                name='Gaussian 2'
+                name='Second Component'
             ))
 
         # ---------------------------------------
@@ -806,114 +805,49 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
             showlegend=False
         ), row=2, col=1)
 
-        fig.update_layout(height=650)
+        # Add annotation to the upper left corner of the O-C subplot
+        fig.add_annotation(
+            x=wavelengths_fit[0],                  # leftmost x
+            y=max(residuals) * 0.9,                # near top of residuals
+            text=f"Reduced χ² = {chi2_red:.2f}",
+            showarrow=False,
+            font=dict(color='black', size=12),
+            xref='x',                               # refers to x-axis of O-C subplot
+            yref='y2',                              # refers to y-axis of second subplot (row=2)
+            align='left'
+        )
+
+        #figure updates
+        fig.update_layout(
+            xaxis=dict(
+                range=[peak_wavelength - 0.2, peak_wavelength + 0.2],
+                title='Wavelength (μm)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            xaxis2=dict(  # bottom subplot for residuals
+                range=[peak_wavelength - 0.2, peak_wavelength + 0.2],
+                title='Wavelength (μm)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            yaxis=dict(
+                title='Flux (Jy)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            yaxis2=dict(
+                title='O-C (Jy)',
+                title_font=dict(color='black'),
+                tickfont=dict(color='black')
+            ),
+            legend=dict(
+                title='Legend',
+                title_font=dict(color='black'),
+                font=dict(color='black')
+            ),
+            height=600
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     return popt, stddev_fit, stddev_unc, perr, chi2_red
-
-"""
-def gaussian_fitter_test(peak_wavelength, fit_width, wavelengths, flux, flux_err, 
-                    title, second_component_mask=None, truncate_side=None, 
-                    truncate_percent=0.0, plot=False):
-    
-    #Fits a Gaussian on top of a linear baseline, with optional second Gaussian
-    #component in regions indicated by second_component_mask.
-    
-    # --- Define fit region ---
-    fit_mask = (wavelengths > (peak_wavelength - fit_width)) & \
-               (wavelengths < (peak_wavelength + fit_width))
-    
-    wavelengths_fit = wavelengths[fit_mask]
-    flux_fit = flux[fit_mask]
-    flux_err_fit = flux_err[fit_mask]
-
-    # --- Truncate if needed ---
-    estimated_stddev = truncate_percent * fit_width
-    if truncate_side == 'left':
-        trunc_point = peak_wavelength - estimated_stddev
-        mask = wavelengths_fit > trunc_point
-        wavelengths_fit, flux_fit, flux_err_fit = wavelengths_fit[mask], flux_fit[mask], flux_err_fit[mask]
-    elif truncate_side == 'right':
-        trunc_point = peak_wavelength + estimated_stddev
-        mask = wavelengths_fit < trunc_point
-        wavelengths_fit, flux_fit, flux_err_fit = wavelengths_fit[mask], flux_fit[mask], flux_err_fit[mask]
-
-    # --- Determine if second Gaussian is needed ---
-    use_second = False
-    if second_component_mask is not None:
-        mask_fit_region = fit_mask  # mask over the original array
-        second_mask_fit = second_component_mask[mask_fit_region]
-        if second_mask_fit.any():
-            use_second = True
-
-    # --- Define models ---
-    if use_second:
-        def two_gaussians_with_baseline(x, a1, m1, s1, a2, m2, s2, slope, intercept):
-            return (gaussian(x, a1, m1, s1) + gaussian(x, a2, m2, s2) +
-                    slope * x + intercept)
-        initial_guess = [
-            np.max(flux_fit)-np.min(flux_fit), peak_wavelength, 0.01,  # first Gaussian
-            np.max(flux_fit)/2, peak_wavelength+0.01, 0.01,             # second Gaussian guess
-            0, np.min(flux_fit)                                         # linear baseline
-        ]
-        bounds_lower = [0, peak_wavelength-fit_width, 1e-5, 0, peak_wavelength-fit_width, 1e-5, -np.inf, -np.inf]
-        bounds_upper = [np.inf, peak_wavelength+fit_width, np.inf, np.inf, peak_wavelength+fit_width, np.inf, np.inf, np.inf]
-        model_func = two_gaussians_with_baseline
-    else:
-        model_func = gaussian_with_baseline
-        initial_guess = [np.max(flux_fit)-np.min(flux_fit), peak_wavelength, 0.01, 0, np.min(flux_fit)]
-        bounds_lower = [0, peak_wavelength-fit_width, 1e-5, -np.inf, -np.inf]
-        bounds_upper = [np.inf, peak_wavelength+fit_width, np.inf, np.inf, np.inf]
-
-    # --- Fit ---
-    try:
-        popt, pcov = curve_fit(model_func, wavelengths_fit, flux_fit, sigma=flux_err_fit,
-                               p0=initial_guess, maxfev=5000, bounds=(bounds_lower, bounds_upper))
-        popt_errs = np.sqrt(np.diag(pcov))
-    except (RuntimeError, ValueError):
-        return [np.nan]*len(initial_guess), np.nan, np.nan, np.array([np.nan]*len(initial_guess))
-    
-    # --- Stddev and uncertainty of first Gaussian ---
-    if use_second:
-        stddev_fit = popt[2]
-        stddev_uncertainty = np.sqrt(pcov[2, 2])
-    else:
-        stddev_fit = popt[2]
-        stddev_uncertainty = np.sqrt(pcov[2, 2])
-
-    # --- Optional plotting (reuse your code from above) ---
-    if plot:
-        fit_vals = model_func(wavelengths_fit, *popt)
-        
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
-                            row_heights=[0.7, 0.3],
-                            vertical_spacing=0.2,
-                            subplot_titles=[f"Gaussian Fit of the {title} line", "O-C Residuals"])
-        
-        # original data
-        fig.add_trace(go.Scatter(x=wavelengths, y=flux, mode='lines', name='Original Data', line=dict(color='blue')))
-        
-        # data used for fit
-        fig.add_trace(go.Scatter(x=wavelengths_fit, y=flux_fit, mode='lines', name='Data for Fit', line=dict(color='green')))
-        
-        # total fit
-        fig.add_trace(go.Scatter(x=wavelengths_fit, y=fit_vals, mode='lines', name='Total Fit', line=dict(color='red')))
-        
-        if use_second:
-            # first Gaussian
-            gauss1_vals = gaussian(wavelengths_fit, popt[0], popt[1], popt[2])
-            fig.add_trace(go.Scatter(x=wavelengths_fit, y=gauss1_vals, mode='lines', name='Gaussian 1', line=dict(color='orange', dash='dot')))
-            
-            # second Gaussian
-            gauss2_vals = gaussian(wavelengths_fit, popt[3], popt[4], popt[5])
-            fig.add_trace(go.Scatter(x=wavelengths_fit, y=gauss2_vals, mode='lines', name='Gaussian 2', line=dict(color='purple', dash='dot')))
-        
-        # O–C residuals
-        residuals = flux_fit - fit_vals
-        fig.add_trace(go.Scatter(x=wavelengths_fit, y=residuals, mode='lines', showlegend=False, line=dict(color='blue')), row=2, col=1)
-        
-        fig.add_trace(go.Scatter(x=wavelengths_fit, y=np.zeros_like(wavelengths_fit), mode='lines', line=dict(color='red', width=2), showlegend=False), row=2, col=1)
-        st.plotly_chart(fig, use_container_width=True)
-
-    return popt, stddev_fit, stddev_uncertainty, popt_errs
-"""                     
