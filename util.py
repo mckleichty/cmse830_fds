@@ -855,7 +855,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
 
     return popt, stddev_fit, stddev_unc, perr, chi2_red
 
-def calc_redshift(mean_fits):
+def calc_redshift(mean_fits, mean_fits_errs):
     # Calculate the observed wavelength using the fitted peak (mean) wavelength
     h2s2_rest = 12.2786 #from Neufeld et. al, 1998, um
     ne2_rest = 12.813550 #from Loki
