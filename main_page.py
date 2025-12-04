@@ -624,7 +624,7 @@ with tab4:
         chi2_maps[j].flatten(),   # reduced chi²
         linewidth_maps[j].flatten()      # line width
     ], axis=1)
-    chi2_threshold = 2
+    chi2_threshold = 3
     #y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
     y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.01)).astype(int)
 
