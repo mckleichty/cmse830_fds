@@ -678,7 +678,7 @@ with tab4:
                         titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
 with tab5:
-    h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err = util.calc_redshift(mean_fits)
+    h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err = util.calc_redshift(mean_fits, mean_fits_errs)
 
 
 
