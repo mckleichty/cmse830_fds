@@ -592,9 +592,10 @@ with tab4:
     #for i, mask in enumerate(valid_bin_masks):
         #chi2_map[mask] = chi2_red[i]
 
+    j = 1 #which emission line to look at
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
-    second_component_label = (chi2_maps[0] > chi2_threshold).astype(int) #for h2s2
+    second_component_label = (chi2_maps[j] > chi2_threshold).astype(int)
 
     fig = px.imshow(second_component_label, 
                 color_continuous_scale='RdBu_r', 
@@ -607,7 +608,6 @@ with tab4:
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
     y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
     i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
-    j = 0 #h2s2 emission line
     title = 'test'
     peak_wavelength = peak_wavelengths[j]
     title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
