@@ -605,15 +605,20 @@ with tab4:
 
     #testingeirighiwreihgihhitrgeihrtg
     # Flatten and stack features: shape = (num_pixels, 2)
-    X = np.stack([
+    X_raw = np.stack([
         chi2_maps[j].flatten(),   # reduced chi²
         linewdith_maps[j].flatten()      # line width
     ], axis=1)
     chi2_threshold = 3.0
-    y = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
+    y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
 
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import train_test_split
+
+    # get rid of nans
+    mask_valid = ~np.isnan(X_raw).any(axis=1)
+    X = X_raw[mask_valid]
+    y = y_raw[mask_valid]
     
     # Split into train/test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
