@@ -612,7 +612,7 @@ with tab4:
     peak_wavelength = peak_wavelengths[j]
     title = f"Gaussian Fit for {round(peak_wavelength,3)} μm line"
     _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
-                    title, truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map=second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
+                    title, truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
     
 """
