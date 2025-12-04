@@ -616,7 +616,7 @@ with tab4:
     with col1:
         #_, _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
         _, _, _, _, _ = util.gaussian_fitter(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], titles2[j], truncate_side = None, truncate_percent = 0.0, plot = True)
-    with col1:
+    with col2:
         _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
                         titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
