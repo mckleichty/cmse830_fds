@@ -884,7 +884,59 @@ def calc_redshift(mean_fits, mean_fits_errs):
 
     return h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err
 
+def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_error=False, vmin = None, vmax = None):
+    """
+    Plots region values over an image. Each region is filled with a uniform value.
+    
+    Parameters
+    ----------
+    region_val (list of arrays): Values in each region.
+    region_val_err (list of arrays): Corresponding error values for each region.
+    region_masks (list of boolean arrays): Masks defining each region.
+    img (2D fits image): Image to overlay.
+    title (str): Title of the plot.
+    unit (str): Unit label for colorbar.
+    center (tuple): ra and dec of the BCG
+    scale (float): Scale bar size.
+    use_error (bool): If True, adjust vmin/vmax based on errors.
+    log_scale (bool): If True, use logarithmic scaling for colorbar.
+    """
+    avg_vals = [np.average(np.array(val)) for val in region_val] # will average if given multiple values for 1 region (like linewidth map)
+    avg_errs = [np.average(np.array(err)) for err in region_val_err]
 
+    # Calculate value range
+    if use_error:
+        vmin = np.min(avg_vals) - np.average(avg_errs)
+        vmax = np.max(avg_vals) + np.average(avg_errs)
+    else:
+        if vmin is None and vmax is None:
+            vmin = np.min(avg_vals)
+            vmax = np.max(avg_vals)
+
+    # Create new image
+    new_img = np.full_like(img.value, np.nan, dtype=float)
+    for i, mask in enumerate(region_masks):
+        new_img[mask] = avg_vals[i]
+
+    #for returning the error image 
+    new_img_err = np.full_like(img.value, np.nan, dtype=float)
+    for i, mask in enumerate(region_masks):
+        new_img_err[mask] = avg_errs[i]
+
+    # Plotting
+    fig, axs = plt.subplots(1, 1, figsize=(8, 6), subplot_kw={'projection': img.wcs})
+
+    im = axs.imshow(new_img, origin='lower', cmap='bwr', norm=norm, vmin=vmin, vmax=vmax)
+    cbar = fig.colorbar(im, ax=axs)
+    cbar.set_label(f'{unit}')
+    axs.set_title(title)
+
+    plt.show()
+
+    # return the median error
+    print('Median Error:', np.median(avg_errs), unit)
+
+    return vmin, vmax, new_img, new_img_err
 
 
 
