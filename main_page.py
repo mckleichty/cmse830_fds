@@ -45,7 +45,8 @@ with tab1:
     - View spectra at a given pixel
     - Fit Gaussian models to emission lines
     - Impute based on quality of Gaussian fits
-    - Make moment maps of emission features (coming soon)
+    - Model and predict whether an emission line requires a second component fit
+    - Make moment maps of emission features
     """)
 
     #st.subheader("You must download the data set from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link) and upload it yourself!")
@@ -87,9 +88,9 @@ with tab1:
     - **Distance:** 307 Mpc (1,001 Mly)
                     
     Vulcan provides an interactive environment for analyzing mid-infrared observations captured by JWST's Medium 
-    Resolution Spectrometer (MRS), using A2597 as a proxy target. By default, it loads Channel 3 data from the MRS, which primarily focuses on 
+    Resolution Spectrometer (MRS), using A2597 as a proxy target. By default, it will load Channel 3 data from the MRS, which primarily focuses on 
     molecular hydrogen and forbidden neon lines; this dataset was downloaded directly from the Mikulski Archive for 
-    Space Telescopes (MAST) and is also available for download from [this Google Drive link](https://drive.google.com/file/d/1UHRmaXy2bDdfFKwCTo-s7IxmROA2eAxV/view?usp=drive_link).
+    Space Telescopes (MAST).
     """)
 
 # --- TAB 2: my IDA ---
@@ -758,13 +759,14 @@ with tab4:
 
 with tab5:
     st.header("Gas Kinematics Analysis")
-    st.markdown("""this is where the magic happens. will be adding more documentation, just haven't had time.
+    st.markdown("""From the linewidth maps we produced for each emission line, we can now calculate the velocity of the gas relative
+    to the center of the BCG. Because the velocity is calculaed relative to this, the redshift of the BCG is required.
     """)
 
     # Check if inputs are provided
     z = st.session_state.z
     if z == 0: #if they haven't inputted a redshift
-        st.warning("Please enter in the correct redshift to produce velocity maps.")
+        st.info("Please enter in the redshift of the BCG to produce velocity maps.")
     else:
         # Run your calculation
 
