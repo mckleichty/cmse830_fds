@@ -854,3 +854,37 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
         st.plotly_chart(fig, use_container_width=True, key = 'help')
 
     return popt, stddev_fit, stddev_unc, perr, chi2_red
+
+def cal_redshift(mean_fits):
+    # Calculate the observed wavelength using the fitted peak (mean) wavelength
+    h2s2_rest = 12.2786 #from Neufeld et. al, 1998, um
+    ne2_rest = 12.813550 #from Loki
+    ne3_rest =  15.555100 #from Loki
+    #h2s1_rest = 17.035 #from Nayak et. al, 2024, um
+    c = 3e5 #km/s
+    
+    h2s2_z = []
+    ne2_z = []
+    ne3_z = []
+    h2s2_z_err = []
+    ne2_z_err = []
+    ne3_z_err = []
+        
+    # this is how we calculate redshift
+    for i in range(len(mean_fits)): #for each region with a measured h2s2 line...
+        
+        h2s2_z.append(mean_fits[i][0]/h2s2_rest - 1)
+        h2s2_z_err.append(mean_fits_errs[i][0]/h2s2_rest) #error propogation
+        
+        ne2_z.append(mean_fits[i][1]/ne2_rest - 1)
+        ne2_z_err.append(mean_fits_errs[i][1]/ne2_rest)
+        
+        ne3_z.append(mean_fits[i][2]/ne3_rest - 1)
+        ne3_z_err.append(mean_fits_errs[i][2]/ne3_rest)
+
+    return h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err
+
+
+
+
+
