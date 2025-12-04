@@ -610,10 +610,16 @@ with tab4:
     i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
     peak_wavelength = peak_wavelengths[j]
     titles2 = ["H2(S2)", "[NeII]", "[NeIII]"]
-    title = f"{titles2[j]}"
-    _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
-                    title, truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
+    #title = f"{titles2[j]}"
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        _, _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
+    with col1:
+        _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
+                        titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
+    
     
 
 
