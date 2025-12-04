@@ -28,7 +28,7 @@ st.set_page_config(page_title="Vulcan", layout="wide")
 uploaded_file, z_input = sidebar_inputs()
 
 #define tabs
-tab1, tab2, tab3, tab4 = st.tabs(["Getting Started", "IDA", "EDA and Imputation", "Feature Engineering/ML"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Getting Started", "IDA", "EDA and Imputation", "Feature Engineering/ML", "Gas Kinematics"])
 
 # --- TAB 1: general information ---
 with tab1:
@@ -677,8 +677,8 @@ with tab4:
         _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
                         titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
-#with tab5:
-    #redshift
+with tab5:
+    h2s2_z, ne2_z, ne3_z, h2s2_z_err, ne2_z_err, ne3_z_err = util.calc_redshift(mean_fits)
 
 
 
