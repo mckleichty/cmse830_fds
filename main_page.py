@@ -645,7 +645,7 @@ with tab4:
     report_df = pd.DataFrame(report_dict).transpose()
     
     # Display nicely in Streamlit
-    st.subheader("Detailed Classification Report")
+    st.subheader("Logistic Regression Summary")
     st.dataframe(report_df)
 
     # Initialize map with NaNs
@@ -665,7 +665,7 @@ with tab4:
         #color_continuous_scale='RdBu_r',
         origin='lower',
         labels={'color': 'Second Component'},
-        title="ML-predicted Pixels Needing Second Component"
+        title="Linear Regression model-predicted Pixels Needing Second Component"
     )
     st.plotly_chart(figs, use_container_width=True)
 
@@ -683,9 +683,15 @@ with tab4:
     f1 = f1_score(y_test, y_pred)
     #st.write(f"F1 score: {f1:.2f}")
     
-    # Optional: detailed classification report
-    report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
-    st.write(report)
+    # Generate classification report as a dict
+    report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
+    
+    # Convert to DataFrame
+    report_df = pd.DataFrame(report_dict).transpose()
+    
+    # Display nicely in Streamlit
+    st.subheader("HGBC Summary")
+    st.dataframe(report_df)
 
     # Predict all pixels
     flat_pred = np.full(X_raw.shape[0], np.nan)
@@ -698,7 +704,7 @@ with tab4:
         origin='lower',
         #color_continuous_scale='RdBu_r',
         labels={'color': 'Second Component'},
-        title="ML-predicted Pixels Needing Second Component"
+        title="HGBC-predicted Pixels Needing Second Component"
     )
     st.plotly_chart(figsss, use_container_width=True)
 
