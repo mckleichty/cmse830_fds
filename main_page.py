@@ -564,6 +564,12 @@ def reduced_chi_squared(flux, flux_err, fit_vals, num_params):
 # --- TAB 4: Machine Learning second-component analysis ---
 with tab4:
     st.header("ML-Based Second Component Prediction")
+    st.markdown("""During the EDA section of this analysis, we saw that for some pixels, there were high $\tilde{\chi}^2$ values.
+    This means that a simple Gaussian model won't work. Instead, we can add a second Gaussian to model the second component of the gas.
+    There can be different gas clouds moving in different directions with the same element in them. Vulcan uses a linear regression
+    machine learning model to predict which pixels will need a second component fit based on the previous $\tilde{\chi}^2$ values 
+    and the linewdiths. You can select below which emission line to focus on.
+    """)
 
     # Load cached processed Gaussian results from Tab 3
     gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
@@ -592,18 +598,12 @@ with tab4:
         for line_idx in range(n_lines):
             chi2_maps[line_idx][mask] = chi2_red[i][line_idx]
 
-    #image_shape = valid_bin_masks[0].shape
-    #chi2_map = np.full(image_shape, np.nan)
-    #for i, mask in enumerate(valid_bin_masks):
-        #chi2_map[mask] = chi2_red[i]
 
     j = 1 #which emission line to look at
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
     second_component_label = (chi2_maps[j] > chi2_threshold).astype(int)
 
-
-    #testingeirighiwreihgihhitrgeihrtg
     # Flatten and stack features: shape = (num_pixels, 2)
     X_raw = np.stack([
         chi2_maps[j].flatten(),   # reduced chi²
@@ -644,23 +644,23 @@ with tab4:
     
     figs = px.imshow(
         second_component_pred,
-        color_continuous_scale='RdBu_r',
+        #color_continuous_scale='RdBu_r',
         origin='lower',
         labels={'color': 'Second Component'},
-        title="ML-predicted pixels needing second component"
+        title="ML-predicted Pixels Needing Second Component"
     )
     st.plotly_chart(figs, use_container_width=True)
 
+    #figss = px.imshow(second_component_label, 
+    #            color_continuous_scale='RdBu_r', 
+    #            origin='lower',
+    #            labels={'color':'Second Component'},
+    #            title="Pixels needing second component (1 = yes, 0 = no)")
+    #st.plotly_chart(figss, use_container_width=True)
 
-    # end of testingnitringnnirtg
-
-    figss = px.imshow(second_component_label, 
-                color_continuous_scale='RdBu_r', 
-                origin='lower',
-                labels={'color':'Second Component'},
-                title="Pixels needing second component (1 = yes, 0 = no)")
-    st.plotly_chart(figss, use_container_width=True)
-
+    st.markdown("""Based on which pixels are predicted to need a second component fit, Vulcan fits two Gaussian models. We expect to
+    see a $\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below.
+    """)
     
     x_pixel = st.number_input("X Pixel", min_value=0, max_value=x_dim - 1, value=18, key = 'x3')
     y_pixel = st.number_input("Y Pixel", min_value=0, max_value=y_dim - 1, value=15, key = 'y3')
