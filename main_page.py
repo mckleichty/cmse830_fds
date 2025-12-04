@@ -10,6 +10,7 @@ from concurrent.futures import ProcessPoolExecutor
 from sklearn.ensemble import RandomForestClassifier
 import plotly.graph_objects as go
 import plotly.express as px
+from sklearn.metrics import f1_score, classification_report
 
 #importing files I wrote
 import util as util #useful functions that would otherwise clutter this file up
@@ -628,9 +629,13 @@ with tab4:
     clf = LogisticRegression()
     clf.fit(X_train, y_train)
     
-    # Optional evaluation
-    accuracy = clf.score(X_test, y_test)
-    st.write(f"ML model accuracy: {accuracy:.2f}")
+    # F1 score
+    f1 = f1_score(y_test, y_pred)
+    st.write(f"F1 score: {f1:.2f}")
+    
+    # Optional: detailed classification report
+    report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
+    st.text(report)
 
     # Initialize map with NaNs
     second_component_pred = np.full(chi2_maps[j].shape, np.nan)
@@ -658,9 +663,13 @@ with tab4:
     clf = RandomForestClassifier(n_estimators=200, random_state=54)
     clf.fit(X_train, y_train)
 
-    # Optional evaluation
-    accuracy = clf.score(X_test, y_test)
-    st.write(f"ML model accuracy: {accuracy:.2f}")
+    # F1 score
+    f1 = f1_score(y_test, y_pred)
+    st.write(f"F1 score: {f1:.2f}")
+    
+    # Optional: detailed classification report
+    report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
+    st.text(report)
 
     # Predict all pixels
     flat_pred = np.full(X_raw.shape[0], np.nan)
