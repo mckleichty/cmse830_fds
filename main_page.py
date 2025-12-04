@@ -652,6 +652,30 @@ with tab4:
     )
     st.plotly_chart(figs, use_container_width=True)
 
+    #second model; random forest
+    # Use RandomForestClassifier instead of LogisticRegression
+    clf = RandomForestClassifier(n_estimators=200, random_state=42)
+    clf.fit(X_train, y_train)
+
+    # Optional evaluation
+    accuracy = clf.score(X_test, y_test)
+    st.write(f"ML model accuracy: {accuracy:.2f}")
+
+    # Predict all pixels
+    flat_pred = np.full(X_raw.shape[0], np.nan)
+    flat_pred[mask_valid] = clf.predict(X)
+    second_component_pred = flat_pred.reshape(chi2_maps[j].shape)
+
+    # Plot interactive map
+    figsss = px.imshow(
+        second_component_pred,
+        origin='lower',
+        color_continuous_scale='RdBu_r',
+        labels={'color': 'Second Component'},
+        title="ML-predicted Pixels Needing Second Component"
+    )
+    st.plotly_chart(figsss, use_container_width=True)
+
     #figss = px.imshow(second_component_label, 
     #            color_continuous_scale='RdBu_r', 
     #            origin='lower',
