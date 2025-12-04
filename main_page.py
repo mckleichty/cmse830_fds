@@ -635,8 +635,17 @@ with tab4:
     #st.write(f"F1 score: {f1:.2f}")
     
     # Optional: detailed classification report
-    report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
-    st.write(report)
+    #report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
+    #st.write(report)
+    # Generate classification report as a dict
+    report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
+    
+    # Convert to DataFrame
+    report_df = pd.DataFrame(report_dict).transpose()
+    
+    # Display nicely in Streamlit
+    st.subheader("Detailed Classification Report")
+    st.dataframe(report_df)
 
     # Initialize map with NaNs
     second_component_pred = np.full(chi2_maps[j].shape, np.nan)
