@@ -673,10 +673,10 @@ with tab4:
         st.dataframe(report_df)
     
     except ValueError as e:
-    st.warning(
-        f"⚠️ Machine learning model could not be trained for this emission line. "
-        f"The data contains only one class. \n\nError: `{e}`"
-    )
+        st.warning(
+            f"⚠️ Machine learning model could not be trained for this emission line. "
+            f"The data contains only one class. \n\nError: `{e}`"
+        )
 
     # Initialize map with NaNs
     second_component_pred = np.full(chi2_maps[j].shape, np.nan)
