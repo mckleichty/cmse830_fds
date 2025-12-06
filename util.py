@@ -904,7 +904,7 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
     avg_vals = [np.average(np.array(val)) for val in region_val] # will average if given multiple values for 1 region (like linewidth map)
     avg_errs = [np.average(np.array(err)) for err in region_val_err]
 
-    # Calculate value range
+    #calculate value range
     if use_error:
         vmin = np.min(avg_vals) - np.average(avg_errs)
         vmax = np.max(avg_vals) + np.average(avg_errs)
@@ -913,7 +913,7 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
             vmin = np.min(avg_vals)
             vmax = np.max(avg_vals)
 
-    # Create new image
+    #create new image
     new_img = np.full_like(img.value, np.nan, dtype=float)
     for i, mask in enumerate(region_masks):
         new_img[mask] = avg_vals[i]
@@ -923,22 +923,13 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
     for i, mask in enumerate(region_masks):
         new_img_err[mask] = avg_errs[i]
 
-    # Plotting
-    #fig, axs = plt.subplots(1, 1, figsize=(8, 6))
-
-    #im = axs.imshow(new_img, origin='lower', cmap='bwr', norm=norm, vmin=vmin, vmax=vmax)
-    #cbar = fig.colorbar(im, ax=axs)
-    #cbar.set_label(f'{unit}')
-    #axs.set_title(title)
-
-    #plt.show()
     fig = px.imshow(
         new_img,
-        origin='lower',            # same as matplotlib's origin='lower'
+        origin='lower',
         color_continuous_scale='RdBu_r',
         zmin=vmin,
         zmax=vmax,
-        labels={'color': unit},    # colorbar label
+        labels={'color': unit},
         title=title
     )
     
@@ -946,7 +937,7 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
     st.plotly_chart(fig, use_container_width=True)
 
     # return the median error
-    print('Median Error:', np.median(avg_errs), unit)
+    st.write('Median Error:', np.median(avg_errs), unit)
 
     return vmin, vmax, new_img, new_img_err
 
