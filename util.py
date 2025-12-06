@@ -923,7 +923,7 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
 
     #create pandas df for table viewing
     stats_df = pd.DataFrame({
-        "Statistic": ["Median Error"]
+        "Statistic": ["Median Error"],
         "Value (km/s)": [np.median(avg_errs)],
     })
 
