@@ -775,11 +775,21 @@ with tab5:
             _, _, _, _ = util.map_vals(velocity_h2s2, velocity_h2s2_err, valid_bin_masks, cont_img, 'Velocity of H2(S2)', 'km/s', use_error = False, vmin = -400, vmax = 400)
         with col2:
             velocity_ne2_err = c * np.array(ne2_z_err) #velocity of ne2 in km/s
-            _, _, ve_ne2_img, velocity_ne2_err_img = util.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks, cont_img, 'Velocity of [Neii]', 'km/s', use_error = False, vmin = -400, vmax = 400)
+            _, _, ve_ne2_img, velocity_ne2_err_img = util.map_vals(velocity_ne2, velocity_ne2_err, valid_bin_masks, cont_img, 'Velocity of [NeII]', 'km/s', use_error = False, vmin = -400, vmax = 400)
         with col3:
             velocity_ne3_err = c * np.array(ne3_z_err) #velocity of ne3 in km/s
-            _, _, ve_ne3_img, _ = util.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks, cont_img, 'Velocity of [Neiii]', 'km/s', use_error = False, vmin = -400, vmax = 400)
-        
+            _, _, ve_ne3_img, _ = util.map_vals(velocity_ne3, velocity_ne3_err, valid_bin_masks, cont_img, 'Velocity of [NeIII]', 'km/s', use_error = False, vmin = -400, vmax = 400)
+
+        st.markdown("""These plots show the velocities of the three different emission lines in this BCG. Pixels that are red represent
+        the points in the galaxy where that gas is moving away from us at that speed. Blue pixels are points where it's moving towards us,
+        and white pixels represent areas that are not moving as much or are moving perpendicularly to us.
+
+        In the case of A2597, we can see that the [NeIII] and [NeII] gases are moving away faster than the H2(S2) gas near pixels (12, 16).
+        This could be representative of an outflow of gas coming out of the AGN.
+
+        Thus, Vulcan has successfully modeled and calculated how gas is moving in A2597, as was our original goal.
+
+        """)
     
     
     
