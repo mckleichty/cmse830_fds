@@ -932,6 +932,16 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
         labels={'color': unit},
         title=title
     )
+
+    fig.update_xaxes(
+        range=[0, new_img.shape[1]],
+        constrain='domain'
+    )
+    fig.update_yaxes(
+        range=[0, new_img.shape[0]],
+        scaleanchor="x",
+        scaleratio=1
+    )
     
     # Display in Streamlit
     st.plotly_chart(fig, use_container_width=True)
