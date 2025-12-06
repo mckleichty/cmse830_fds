@@ -932,21 +932,21 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
         labels={'color': unit},
         title=title
     )
-
-    fig.update_xaxes(
-        range=[0, new_img.shape[1]],
-        constrain='domain'
-    )
-    fig.update_yaxes(
-        range=[0, new_img.shape[0]],
-        scaleanchor="x",
-        scaleratio=1
-    )
     
-    # Display in Streamlit
+    fig.update_layout(
+        title=dict(font=dict(color='black')),
+        coloraxis_colorbar=dict(title=dict(font=dict(color='black')), tickfont=dict(color='black')),
+        xaxis=dict(title=dict(text='X Pixel', font=dict(color='black')), tickfont=dict(color='black')),
+        yaxis=dict(title=dict(text='Y Pixel', font=dict(color='black')), tickfont=dict(color='black')),
+        hoverlabel=dict(font=dict(color='black'))
+    )
+
+    fig.update_xaxes(range=[0, new_img.shape[1]], constrain='domain')
+    fig.update_yaxes(range=[0, new_img.shape[0]], scaleanchor="x", scaleratio=1)
+    
     st.plotly_chart(fig, use_container_width=True)
 
-    # return the median error
+    #return the median error
     st.write('Median Error:', np.median(avg_errs), unit)
 
     return vmin, vmax, new_img, new_img_err
