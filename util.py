@@ -20,6 +20,7 @@ from scipy.ndimage import generic_filter
 from vorbin.voronoi_2d_binning import voronoi_2d_binning
 import plotly.express as px
 import random
+import pandas as pd
 
 def open_file(data_file):
     #this function is just to get the science cube information
