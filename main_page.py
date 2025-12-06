@@ -7,11 +7,14 @@ from scipy.signal import find_peaks
 from sklearn.preprocessing import OrdinalEncoder
 from io import BytesIO
 from concurrent.futures import ProcessPoolExecutor
-from sklearn.ensemble import RandomForestClassifier
+#from sklearn.ensemble import RandomForestClassifier
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.metrics import f1_score, classification_report
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 #importing files I wrote
 import util as util #useful functions that would otherwise clutter this file up
@@ -579,13 +582,13 @@ with tab4:
     st.header("ML-Based Second Component Prediction")
     st.markdown("""During the EDA section of this analysis, we saw that for some pixels, there were high $\\tilde{\chi}^2$ values.
     This means that a simple Gaussian model won't work. Instead, we can add a second Gaussian to model the second component of the gas.
-    There can be different gas clouds moving in different directions with the same element in them. Vulcan uses a linear regression
-    machine learning model to predict which pixels will need a second component fit based on the previous $\\tilde{\chi}^2$ values 
+    There can be different gas clouds moving in different directions with the same element in them. Vulcan uses two different regression
+    machine learning models to predict which pixels will need a second component fit based on the previous $\\tilde{\chi}^2$ values 
     and the linewidths. You can select below which emission line to focus on.
     """)
-    st.subheader("H2S2 is not working right now because it doesn't need any second components fit...")
+    #st.subheader("H2S2 is not working right now because it doesn't need any second components fit...")
 
-    # Load cached processed Gaussian results from Tab 3
+    #load cached gaussian results
     gauss_key = f"gauss_fit_results_snr_{st.session_state.snr_used}"
     fit_results = st.session_state[gauss_key]
 
@@ -612,148 +615,101 @@ with tab4:
         for line_idx in range(n_lines):
             chi2_maps[line_idx][mask] = chi2_red[i][line_idx]
 
-
-    #j = 1 #which emission line to look at
-
     #round the peak wavelengths for display
     peak_labels = [fr"H$_2$(S2) at {peak_wavelengths[0]:.3f} μm", f"[NeII] at {peak_wavelengths[1]:.3f} μm", f"[NeIII] at {peak_wavelengths[2]:.3f} μm"]
     
     #let user choose one of the three peak wavelengths
-    selected_label = st.radio("Choose emission line:", peak_labels, key = 'iwejfirejgf')
+    selected_label = st.radio("Choose emission line:", peak_labels, index = 1, key = 'iwejfirejgf') #default neii one
     
     #get the actual wavelength value from the label
     j = peak_labels.index(selected_label)
-    #j = peak_wavelengths[selected_index]
 
-    
     chi2_threshold = 3.0
     # chi2_map is 2D array of reduced chi^2 for each pixel
     second_component_label = (chi2_maps[j] > chi2_threshold).astype(int)
 
-    # Flatten and stack features: shape = (num_pixels, 2)
-    X_raw = np.stack([
-        chi2_maps[j].flatten(),   # reduced chi²
-        linewidth_maps[j].flatten()      # line width
-    ], axis=1)
-    chi2_threshold = 3
-    #y_raw = (chi2_maps[j].flatten() > chi2_threshold).astype(int)
+    #flatten and stack features: shape = (num_pixels, 2)
+    X_raw = np.stack([chi2_maps[j].flatten(), linewidth_maps[j].flatten()], axis=1)
     y_raw = ((chi2_maps[j].flatten() > chi2_threshold) & (linewidth_maps[j].flatten() > 0.01)).astype(int)
 
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.model_selection import train_test_split
-
-    # get rid of nans
+    #get rid of nans
     mask_valid = ~np.isnan(X_raw).any(axis=1)
     X = X_raw[mask_valid]
     y = y_raw[mask_valid]
 
     try:
-        # Split into train/test
+        #split into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
+
+        #start with logistic regression model
         clf = LogisticRegression()
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
         
-        # F1 score
-        f1 = f1_score(y_test, y_pred)
-        #st.write(f"F1 score: {f1:.2f}")
-        
-        # Optional: detailed classification report
-        #report = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'])
-        #st.write(report)
-        # Generate classification report as a dict
+        #classification report
         report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
-        
-        # Convert to DataFrame
         report_df = pd.DataFrame(report_dict).transpose()
         
-        # Display nicely in Streamlit
         st.subheader("Logistic Regression Summary")
         st.dataframe(report_df)
     
-    except ValueError as e:
+    except ValueError as e: #if a line doesn't need any second components
         st.warning(
-            f"⚠️ Machine learning model could not be trained for this emission line. "
+            f"Machine learning model could not be trained for this emission line. "
             f"The data does not need any second components fit."
         )
 
-    # Initialize map with NaNs
+    #create map for second component with nans
     second_component_pred = np.full(chi2_maps[j].shape, np.nan)
-    
-    # Flatten the map to 1D
     flat_pred = np.full(X_raw.shape[0], np.nan)
-    
-    # Assign predictions to valid indices
+
+    #assign predictions to valid indices
     flat_pred[mask_valid] = clf.predict(X)
     
-    # Reshape back to 2D
+    #reshape back to 2D
     second_component_pred = flat_pred.reshape(chi2_maps[j].shape)
     
     figs = px.imshow(
         second_component_pred,
-        #color_continuous_scale='RdBu_r',
         origin='lower',
         labels={'color': 'Second Component'},
         title="Logistic Regression model-predicted Pixels Needing Second Component"
     )
     st.plotly_chart(figs, use_container_width=True)
 
+    #this is for the second model, HGBC
     try:
-        # Split into train/test
+        #split into train and test sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        #second model; random forest
-        # Use RandomForestClassifier instead of LogisticRegression
-        #clf = RandomForestClassifier(n_estimators=200, random_state=54)
-        #clf.fit(X_train, y_train)
-        from sklearn.ensemble import HistGradientBoostingClassifier
-    
+            
         clf = HistGradientBoostingClassifier(max_iter=100, random_state=42)
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
-    
-        # F1 score
-        f1 = f1_score(y_test, y_pred)
-        #st.write(f"F1 score: {f1:.2f}")
         
-        # Generate classification report as a dict
         report_dict = classification_report(y_test, y_pred, target_names=['No second component', 'Second component'], output_dict=True)
-        
-        # Convert to DataFrame
         report_df = pd.DataFrame(report_dict).transpose()
         
-        # Display nicely in Streamlit
         st.subheader("HGBC Summary")
         st.dataframe(report_df)
 
     except ValueError as e:
         st.warning(
-            f"⚠️ Machine learning model could not be trained for this emission line. "
+            f"Machine learning model could not be trained for this emission line. "
             f"The data does not need any second components fit."
         )
 
-    # Predict all pixels
+    #predict all pixels
     flat_pred = np.full(X_raw.shape[0], np.nan)
     flat_pred[mask_valid] = clf.predict(X)
     second_component_pred = flat_pred.reshape(chi2_maps[j].shape)
-
-    # Plot interactive map
+    
     figsss = px.imshow(
         second_component_pred,
         origin='lower',
-        #color_continuous_scale='RdBu_r',
         labels={'color': 'Second Component'},
         title="HGBC-predicted Pixels Needing Second Component"
     )
     st.plotly_chart(figsss, use_container_width=True)
-
-    #figss = px.imshow(second_component_label, 
-    #            color_continuous_scale='RdBu_r', 
-    #            origin='lower',
-    #            labels={'color':'Second Component'},
-    #            title="Pixels needing second component (1 = yes, 0 = no)")
-    #st.plotly_chart(figss, use_container_width=True)
 
     st.markdown("""Based on which pixels are predicted to need a second component fit, Vulcan fits two Gaussian models. We expect to
     see a $\\tilde{\chi}^2$ value closer to 1 if it's fit with a second Gaussian. The fits for a given pixel are shown below.
@@ -764,11 +720,9 @@ with tab4:
     i = bin_map[y_pixel][x_pixel] #index to grab the spectrum from
     peak_wavelength = peak_wavelengths[j]
     titles2 = ["H2(S2)", "[NeII]", "[NeIII]"]
-    #title = f"{titles2[j]}"
     
     col1, col2 = st.columns([1, 1])
     with col1:
-        #_, _, _, _, _, _, _ = util.extracted_vals_from_gaussian(peak_wavelengths, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], plot=True)
         _, _, _, _, _ = util.gaussian_fitter(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], titles2[j], truncate_side = None, truncate_percent = 0.0, plot = True)
     with col2:
         _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
