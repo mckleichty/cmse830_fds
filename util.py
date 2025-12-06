@@ -938,7 +938,8 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
         coloraxis_colorbar=dict(title=dict(font=dict(color='black')), tickfont=dict(color='black')),
         xaxis=dict(title=dict(text='X Pixel', font=dict(color='black')), tickfont=dict(color='black')),
         yaxis=dict(title=dict(text='Y Pixel', font=dict(color='black')), tickfont=dict(color='black')),
-        hoverlabel=dict(font=dict(color='black'))
+        hoverlabel=dict(font=dict(color='black')),
+        height = 500
     )
 
     fig.update_xaxes(range=[0, new_img.shape[1]], constrain='domain')
