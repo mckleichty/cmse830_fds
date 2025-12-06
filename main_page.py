@@ -728,6 +728,13 @@ with tab4:
         _, _, _, _, _ = util.gaussian_fitter_new(peak_wavelength, 0.1, wavelengths, bin_fluxes[i], bin_errors[i], 
                         titles2[j], truncate_side=None, truncate_percent=0.0, plot=True, second_comp_map = bool(second_component_label[y_pixel, x_pixel]))
 
+    st.markdown("""We can see that for pixel (18, 15) and similar, there is a clear second component that needs to be fit. In the residuals,
+    we can also see that the $\\tilde{\chi}^2$ is significantly reduced and much closer to 1. The orange dashed line represents the main component
+    being fit (usually the brightest part), the purple dashed line is the second component, and the red line represents the total model. With this
+    information, we can now calculate how fast these different gases are moving (see the gas kinematics tab).
+
+    """)
+
 with tab5:
     st.header("Gas Kinematics Analysis")
     st.markdown("""From the linewidth maps we produced for each emission line, we can now calculate the velocity of the gas relative
