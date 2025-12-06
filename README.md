@@ -69,6 +69,16 @@ To mitigate this, Vulcan uses a spatial k-nearest neighbors (KNN) approach. If a
 
 Ultimately, imputation is offered as a last resort, and users are strongly encouraged to interpret imputed regions with skepticism.
 
+### Machine Learning Models
+Vulcan defaults to fitting each emission line with only one Gaussian, but many times, there is a second component that needs fit. In this case, Vulcan will use two different machine learning models to predict whether an emission line in a given pixel needs to be fit with two Gaussians. The two different models used are Logisitic Regression and Histogram-Based Gradient Boosting Classifier. 
+
+After the predictions are made from the models, Vulcan fits either a one Gaussian or two Gaussian model to each emission line and plots the residuals. An example for A2597 can be seen below.
+
+![gaussian_fits](images/gaussian_fits.jpg)
+
+### Gas Kinematics
+Finally, Vulcan takes these Gaussian-fit linewidth maps and calculates the redshift and then velocity offsets of each emission line in each pixel. These velocity maps give us a relative idea of how fast and what direction the gas is moving in the cluster. Based on where the AGN is located, we can tell whether there's a disk present, an outflow, or maybe a jet.
+
 ## Streamlit features
 
 Vulcan uses Streamlit’s `session_state` feature to persist uploaded files, user inputs, and intermediate results during reruns caused by widget updates. By storing key data in the session state, Vulcan avoids unnecessary recomputation and ensures that users don’t lose their progress when adjusting parameters or exploring different features.
