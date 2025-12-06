@@ -921,8 +921,20 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
     
     st.plotly_chart(fig, use_container_width=True)
 
+    #create pandas df for table viewing
+    stats_df = pd.DataFrame({
+        "Statistic": ["Median Error"]
+        "Value (km/s)": [np.median(avg_errs)],
+    })
+
+    #format the values to 5 decimal places
+    stats_df["Value (μm)"] = stats_df["Value (km/s)"].map(lambda x: f"{x:.3f}")
+    #stats_df["Error (μm)"] = stats_df["Error (μm)"].map(lambda x: f"{x:.5f}")
+
+    st.dataframe(stats_df, use_container_width=True, height=150)
+
     #return the median error
-    st.write('Median Error:', np.median(avg_errs), unit)
+    #st.write('Median Error:', np.median(avg_errs), unit)
 
     return vmin, vmax, new_img, new_img_err
 
