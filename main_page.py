@@ -783,12 +783,11 @@ with tab5:
         st.markdown("""These plots show the velocities of the three different emission lines in this BCG. Pixels that are red represent
         the points in the galaxy where that gas is moving away from us at that speed. Blue pixels are points where it's moving towards us,
         and white pixels represent areas that are not moving as much or are moving perpendicularly to us.
-
-        In the case of A2597, we can see that the [NeIII] and [NeII] gases are moving away faster than the H2(S2) gas near pixels (12, 16).
+        """)
+        st.markdown("""In the case of A2597, we can see that the [NeIII] and [NeII] gases are moving away faster than the H2(S2) gas near pixels (12, 16).
         This could be representative of an outflow of gas coming out of the AGN.
-
-        Thus, Vulcan has successfully modeled and calculated how gas is moving in A2597, as was our original goal.
-
+        """)
+        st.markdown("""Thus, Vulcan has successfully modeled and calculated how gas is moving in A2597, as was our original goal.
         """)
     
     
