@@ -917,8 +917,19 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
         height = 375
     )
 
-    fig.update_xaxes(range=[0, new_img.shape[1]], constrain='domain')
-    fig.update_yaxes(range=[0, new_img.shape[0]], scaleanchor="x", scaleratio=1)
+    #fig.update_xaxes(range=[0, new_img.shape[1]], constrain='domain')
+    #fig.update_yaxes(range=[0, new_img.shape[0]], scaleanchor="x", scaleratio=1)
+
+    H, W = new_img.shape
+    zoom = 2  # increasing this zooms in more
+    
+    cx, cy = W/2, H/2
+    half_w = (W/zoom)/2
+    half_h = (H/zoom)/2
+    
+    fig.update_xaxes(range=[cx - half_w, cx + half_w])
+    fig.update_yaxes(range=[cy - half_h, cy + half_h], scaleanchor="x", scaleratio=1)
+
     
     st.plotly_chart(fig, use_container_width=True)
 
