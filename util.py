@@ -3,7 +3,7 @@
 This file contains helper functions for the main source code in Vulcan.
 
 Created by: McKenna Leichty
-Last Updated: Oct 13, 2025
+Last Updated: Dec 06, 2025
 
 """
 #import modules
@@ -613,10 +613,7 @@ def impute_with_neighbors(data, quality, required_quality=1, min_neighbors=3):
     return imputed_data
 
 def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err, title, truncate_side=None, truncate_percent=0.0, plot=False, second_comp_map=False):
-
-    # -------------------------
-    # ---  MODEL DEFINITIONS ---
-    # -------------------------
+    #new model definitions for fitting two gaussians
     def one_gauss(x, amp, mean, std, slope, intercept):
         g = amp * np.exp(-((x - mean)**2) / (2*std**2))
         return g + slope*x + intercept
@@ -626,17 +623,14 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
         g2 = a2 * np.exp(-((x - m2)**2) / (2*s2**2))
         return g1 + g2 + slope*x + intercept
 
-
-    # -------------------------
-    # --- FITTING RANGE ---
-    # -------------------------
+    # fitting range
     mask = (wavelengths > peak_wavelength - fit_width) & \
            (wavelengths < peak_wavelength + fit_width)
     xfit, yfit, efit = wavelengths[mask], flux[mask], flux_err[mask]
 
     est_std = truncate_percent * fit_width
 
-    # Optional truncation
+    #optional truncation
     if truncate_side == 'left':
         m2 = xfit > (peak_wavelength - est_std)
         xfit, yfit, efit = xfit[m2], yfit[m2], efit[m2]
@@ -644,18 +638,15 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
         m2 = xfit < (peak_wavelength + est_std)
         xfit, yfit, efit = xfit[m2], yfit[m2], efit[m2]
 
-
-    # -------------------------
-    # --- INITIAL GUESSES ---
-    # -------------------------
+    #initial guesses
     base_guess = np.min(yfit)
     amp_guess = np.max(yfit) - base_guess
 
     if second_comp_map:
         initial_guess = [
-            amp_guess * 0.6, peak_wavelength - 0.003, 0.01,  # comp1
-            amp_guess * 0.4, peak_wavelength + 0.003, 0.01,  # comp2
-            0.0, base_guess                                  # baseline
+            amp_guess * 0.6, peak_wavelength - 0.003, 0.01,
+            amp_guess * 0.4, peak_wavelength + 0.003, 0.01,
+            0.0, base_guess
         ]
 
         bounds_low = [0, peak_wavelength - fit_width, 1e-5,
@@ -678,10 +669,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
         model = one_gauss
         n_params = 5
 
-
-    # -------------------------
-    # --- FIT ---
-    # -------------------------
+    #try and fit it
     try:
         popt, pcov = curve_fit(
             model, xfit, yfit, sigma=efit, p0=initial_guess,
@@ -691,15 +679,11 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
     except (RuntimeError, ValueError):
         return [np.nan]*n_params, np.nan, np.nan, np.array([np.nan]*n_params), np.nan
 
-
     # for compatibility return std of comp 1 (or only comp)
     stddev_fit = popt[2]
     stddev_unc = perr[2]
 
-
-    # -------------------------
-    # --- MODEL + UNC ---
-    # -------------------------
+    #fit
     fit_vals = model(xfit, *popt)
 
     # numerical jacobian
@@ -714,26 +698,20 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
 
     fit_unc = np.sqrt(np.sum(J @ pcov * J, axis=1))
 
-
-    # -------------------------
-    # --- CHI2 ---
-    # -------------------------
+    #reduced chi^2
     residuals = yfit - fit_vals
     chi2 = np.sum((residuals / efit)**2)
     dof = len(yfit) - n_params
     chi2_red = chi2 / dof
 
-
-    # -------------------------
-    # --- PLOTTING ---
-    # -------------------------
+    #plotting
     if plot:
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                             row_heights=[0.7, 0.3],
                             vertical_spacing=0.2,
                             subplot_titles=[f"Gaussian Fit(s) of the {title} line", "O-C Residuals"])
 
-        # Make subplot titles black
+        #make subplot titles black
         fig.update_annotations(font=dict(color='black'))
 
         # full spectrum
@@ -766,9 +744,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
             name='Total Model'
         ))
 
-        # ---------------------------------------
-        # --- NEW: PLOT INDIVIDUAL GAUSSIANS ---
-        # ---------------------------------------
+        #for the second component part
         if second_comp_map:
 
             # unpack
@@ -794,8 +770,6 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
                 name='Second Component'
             ))
 
-        # ---------------------------------------
-
         # residuals
         fig.add_trace(go.Scatter(
             x=xfit, y=residuals, mode='lines',
@@ -810,13 +784,13 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
         ), row=2, col=1)
 
         fig.add_annotation(
-            x=xfit[0],                  # leftmost x in the O–C plot
-            y=max(residuals) * 1.5,     # your original vertical placement
+            x=xfit[0],
+            y=max(residuals) * 1.5,
             text=f"Reduced χ² = {chi2_red:.2f}",
             showarrow=False,
             font=dict(color='black', size=12),
-            xref='x2',                  # important: O–C subplot x-axis
-            yref='y2',                  # important: O–C subplot y-axis
+            xref='x2',
+            yref='y2',
             align='left'
         )
 
@@ -856,7 +830,7 @@ def gaussian_fitter_new(peak_wavelength, fit_width, wavelengths, flux, flux_err,
     return popt, stddev_fit, stddev_unc, perr, chi2_red
 
 def calc_redshift(mean_fits, mean_fits_errs):
-    # Calculate the observed wavelength using the fitted peak (mean) wavelength
+    #calculate the observed wavelength using the fitted peak (mean) wavelength
     h2s2_rest = 12.2786 #from Neufeld et. al, 1998, um
     ne2_rest = 12.813550 #from Loki
     ne3_rest =  15.555100 #from Loki
