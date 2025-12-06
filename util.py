@@ -931,7 +931,7 @@ def map_vals(region_val, region_val_err, region_masks, img, title, unit, use_err
     #format the values to 5 decimal places
     stats_df["Value (km/s)"] = stats_df["Value (km/s)"].map(lambda x: f"{x:.3f}")
     
-    st.dataframe(stats_df.iloc[[0]], use_container_width=True, height=150)
+    st.dataframe(stats_df.iloc[[0]], use_container_width=True)
 
     return vmin, vmax, new_img, new_img_err
 
