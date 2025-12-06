@@ -15,11 +15,7 @@ The general features of the app are listed below:
 - Fit Gaussian models to spectral lines
 - Generate linewidth maps and estimate gas dynamics
 - Impute missing/poor-quality fits with SNR-based Voronoi binning and Spatial KNN
-
-Along with future features: 
-- Moment maps of velocity and redshift
-- Line ratio analysis
-- Support for additional datasets
+- Model and predict whether an emission line requires a second component fit
 
 ## Getting Started
 
