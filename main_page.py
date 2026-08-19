@@ -87,7 +87,7 @@ with tab1:
     
     - **Right ascension:** 23h 25m 19.70s  
     - **Declination:** -12° 07' 27.07"
-    - **Redshift:** 0.0852  
+    - **Redshift:** 0.0821 
     - **Distance:** 307 Mpc (1,001 Mly)
                     
     Vulcan provides an interactive environment for analyzing mid-infrared observations captured by JWST's Medium 
