@@ -738,7 +738,7 @@ with tab4:
 with tab5:
     st.header("Gas Kinematics Analysis")
     st.markdown("""From the linewidth maps we produced for each emission line, we can now calculate the velocity of the gas relative
-    to the center of the BCG. Because the velocity is calculaed relative to this, the redshift of the BCG is required.
+    to the center of the BCG. Because the velocity is calculated relative to this, the redshift of the BCG is required.
     """)
 
     #check if redshift input is provided
